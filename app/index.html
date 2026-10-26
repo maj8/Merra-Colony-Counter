@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#131e21">
+<meta name="description" content="Merra Colony Counter: free tap-to-count tool for seabird colony photos, with per-species counts, time logs and CSV export. From Merra (merra.org).">
+<meta name="apple-mobile-web-app-title" content="Colony Counter">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Merra Colony Counter</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/merra-favicon-64.png">
+<link rel="apple-touch-icon" href="icons/merra-apple-touch-180.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="bar top">
+  <div class="row" id="surveyRow" hidden>
+    <span id="surveyTitle" class="survey-title"></span>
+    <span id="progress" class="progress"></span>
+  </div>
+  <div class="row">
+    <a class="brand" href="about.html" title="About Merra Colony Counter">
+      <img src="icons/merra-favicon-64.png" alt="Merra">
+      <span class="brand-text"><b>Colony Counter</b><small>by Merra</small></span>
+    </a>
+    <label class="btn primary" id="openBtn" title="Choose image files">
+      Open images
+      <input id="fileInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple hidden>
+    </label>
+    <label class="btn" id="folderBtn" title="Choose a whole folder">
+      Folder
+      <input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+    </label>
+    <button class="btn icon" id="prevBtn" aria-label="Previous image">&#8249;</button>
+    <select id="imageSelect" aria-label="Image"><option value="">No images loaded</option></select>
+    <button class="btn icon" id="nextBtn" aria-label="Next image">&#8250;</button>
+    <button class="btn icon" id="menuBtn" aria-label="More">&#8942;</button>
+  </div>
+  <div class="row species" id="speciesBar" role="radiogroup" aria-label="Species"></div>
+</header>
+
+<main id="stage">
+  <canvas id="canvas"></canvas>
+  <div id="empty" class="empty">
+    <p id="emptyLead"><strong>Open your colony photos</strong> to start.</p>
+    <p>Pick a species, then <b>tap / click</b> each bird to add a dot.<br>
+       <b>Right-click</b> (or tap a dot of the selected species) to remove a dot.<br>
+       Tapping a dot of another species changes it to the selected species.<br>
+       Pinch or scroll to zoom, drag to pan. Press <b>Done</b> when an image is finished.</p>
+    <p class="credit">Merra Colony Counter is free to use. Please acknowledge
+       <b>Merra Colony Counter (merra.org)</b> when you use its counts.
+       <a href="about.html">About, downloads and survey builder</a></p>
+  </div>
+  <div id="doneBanner" class="done-banner" hidden>Marked as done — press <b>Done</b> again to reopen and edit</div>
+</main>
+
+<footer class="bar bottom">
+  <button class="btn" id="undoBtn">Undo</button>
+  <button class="btn" id="fitBtn">Fit</button>
+  <span id="status" class="status"></span>
+  <span id="timer" class="timer" title="Time spent annotating this image (pauses when you are inactive)"></span>
+  <button class="btn" id="doneBtn">Done</button>
+  <button class="btn" id="exportBtn">Export CSV</button>
+  <button class="btn primary" id="saveBtn">Save</button>
+</footer>
+
+<dialog id="menu">
+  <form method="dialog">
+    <h2>Options</h2>
+    <p class="hint" id="observerLine"></p>
+    <p class="hint" id="menuInstr" hidden></p>
+    <button class="btn wide" value="observer">Change observer name</button>
+    <button class="btn wide" value="times">Export time log (CSV)</button>
+    <button class="btn wide" value="points">Export point locations (CSV)</button>
+    <button class="btn wide" value="backup">Back up all data (JSON)</button>
+    <label class="btn wide">Restore from backup…
+      <input id="restoreInput" type="file" accept="application/json,.json" hidden>
+    </label>
+    <button class="btn wide" value="species" id="speciesMenuBtn">Edit species list</button>
+    <button class="btn wide danger" value="clearImage">Clear dots on this image</button>
+    <button class="btn wide danger" value="clearAll">Clear ALL data</button>
+    <a class="btn wide" href="about.html">About Merra Colony Counter</a>
+    <button class="btn wide" value="close">Close</button>
+  </form>
+</dialog>
+
+<dialog id="speciesDlg">
+  <form method="dialog">
+    <h2>Species list</h2>
+    <p class="hint">One species per line. Existing dots keep their species name.</p>
+    <textarea id="speciesText" rows="10"></textarea>
+    <div class="row end">
+      <button class="btn" value="reset">Restore defaults</button>
+      <button class="btn" value="cancel">Cancel</button>
+      <button class="btn primary" value="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="observerDlg">
+  <form method="dialog">
+    <h2>Who is counting?</h2>
+    <p class="hint" id="surveyInstr" hidden></p>
+    <p class="hint">Your name or initials are added to the results so counts from different people can be told apart.</p>
+    <input id="observerInput" type="text" maxlength="60" autocomplete="name" placeholder="e.g. Jane Smith">
+    <div class="row end">
+      <button class="btn primary" value="ok">Start</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Optional: a survey prepared by the administrator (see admin.html). If the file is
+     missing the app simply works in "open your own images" mode. -->
+<script src="survey/survey.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "name": "Merra Colony Counter",
+  "short_name": "Colony Counter",
+  "description": "Free tap-to-count tool for seabird colony photos: per-species counts, time logs and CSV export. From Merra (merra.org).",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1517",
+  "theme_color": "#131e21",
+  "icons": [
+    {
+      "src": "icons/merra-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/merra-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/merra-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/merra-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

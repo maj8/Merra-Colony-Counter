@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#131e21">
+<meta name="description" content="Merra Colony Counter: a free tool for counting seabirds in colony photos, by species, with time logs and CSV export. Build a survey, send it to your counters, combine the results.">
+<title>Merra Colony Counter</title>
+<link rel="icon" href="icons/merra-favicon-64.png">
+<link rel="apple-touch-icon" href="icons/merra-apple-touch-180.png">
+<style>
+  :root { --bg:#0d1517; --panel:#131e21; --soft:#1c2b2f; --line:#26373b; --fg:#e2ebe9; --muted:#92a6a8;
+          --sea:#4fb3ba; --sea-ink:#062124; --buoy:#f08a4f; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  a { color: var(--sea); }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+  header.hero { padding: 36px 0 28px; border-bottom: 1px solid var(--line);
+    background: radial-gradient(1200px 300px at 20% 0%, #14353a 0%, transparent 70%); }
+  .mark { display:flex; align-items:center; gap:14px; margin-bottom:18px; text-decoration:none; color:var(--fg); }
+  .mark img { width:52px; height:52px; border-radius:12px; }
+  .mark span { font-size:14px; color:var(--muted); line-height:1.25; }
+  .mark b { display:block; color:var(--fg); font-size:18px; letter-spacing:.01em; }
+  h1 { font-size: clamp(28px, 5vw, 42px); line-height:1.1; margin: 0 0 12px; letter-spacing:-.01em; }
+  .lead { font-size: 18px; color: var(--muted); margin: 0 0 22px; max-width: 640px; }
+  .lead b { color: var(--fg); }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:46px; padding: 0 18px;
+    border-radius:10px; background:var(--soft); color:var(--fg); text-decoration:none; font-weight:600; border:1px solid var(--line); }
+  .btn:hover { border-color: var(--sea); }
+  .btn.primary { background:var(--sea); color:var(--sea-ink); border-color:var(--sea); }
+  .btn small { font-weight:500; opacity:.75; }
+  section { padding: 30px 0; border-bottom: 1px solid var(--line); }
+  h2 { font-size: 22px; margin: 0 0 14px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border:1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .card h3 { margin: 0 0 6px; font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  ol.flow { margin:0; padding:0; list-style:none; counter-reset: s; display:grid; gap:10px; }
+  ol.flow li { counter-increment: s; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 14px 14px 56px; position:relative; }
+  ol.flow li::before { content: counter(s); position:absolute; left:14px; top:13px; width:28px; height:28px; border-radius:50%;
+    background:var(--sea); color:var(--sea-ink); font-weight:700; display:grid; place-items:center; font-size:14px; }
+  ol.flow b { color: var(--fg); }
+  ol.flow span { color: var(--muted); }
+  .dl { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+  .dl + .dl { margin-top: 12px; }
+  .dl p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  .cite { background: var(--panel); border-left: 4px solid var(--buoy); padding: 14px 16px; border-radius: 0 10px 10px 0; margin: 12px 0; }
+  .cite code { font-family: ui-monospace, "IBM Plex Mono", Consolas, monospace; font-size: 15px; color: var(--fg); }
+  .muted { color: var(--muted); }
+  details { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding: 12px 16px; margin-top: 12px; }
+  details summary { cursor:pointer; font-weight:600; }
+  details li { margin: 6px 0; }
+  footer { padding: 26px 0 40px; color: var(--muted); font-size: 14px; }
+  footer .row { display:flex; flex-wrap:wrap; gap: 8px 20px; align-items:center; justify-content:space-between; }
+  .ver { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <a class="mark" href="https://merra.org" rel="noopener"><img src="icons/merra-192.png" alt="Merra"><span><b>Merra</b>merra.org</span></a>
+    <h1>Merra Colony Counter</h1>
+    <p class="lead">Count seabirds in colony photos, species by species. Tap each bird, get the counts.
+      <b>Free to use</b>, on a computer, tablet or phone, with or without a signal.</p>
+    <div class="actions">
+      <a class="btn primary" href="./">Open the counter</a>
+      <a class="btn" href="https://colony.merra.org/survey-builder.html">Make a survey for a team</a>
+      <a class="btn" href="#download">Downloads</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <h2>What it does</h2>
+    <div class="grid">
+      <div class="card"><h3>Tap to count</h3><p>Pick a species and tap each bird. Every bird keeps its dot, so nothing is counted twice or missed. Zoom right in on dense ledges.</p></div>
+      <div class="card"><h3>Counts by photo and species</h3><p>One master CSV of photo, species and count, plus every dot's position so the counted photos can be redrawn or checked.</p></div>
+      <div class="card"><h3>Time on each photo</h3><p>Records how long each counter spends on each photo, adding up across sessions and pausing when they stop.</p></div>
+      <div class="card"><h3>Private and offline</h3><p>Photos and counts stay on the device. Nothing is uploaded to Merra. Once opened, it keeps working without a signal.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Running a survey with a team</h2>
+    <ol class="flow">
+      <li><b>Build the survey.</b> <span>In the survey builder, add a title, the species list, instructions and your photos. It makes a complete survey app in one zip.</span></li>
+      <li><b>Publish it.</b> <span>Drag the zip onto a web host such as Netlify Drop to get a web address for it.</span></li>
+      <li><b>Send the address.</b> <span>Counters open it, enter their name and count the same photos. On phones and tablets they can add it to the home screen.</span></li>
+      <li><b>Combine the results.</b> <span>Counters press Save and send you their file. The survey builder merges them into one counts CSV and one time log.</span></li>
+    </ol>
+  </section>
+
+  <section id="download">
+    <h2>Downloads</h2>
+    <div class="card">
+      <div class="dl">
+        <div><b>Survey builder</b> <span class="muted">(one file, everything included)</span>
+          <p>Double-click it in Chrome, Edge, Firefox or Safari. It builds survey apps and combines results.</p></div>
+        <a class="btn primary" href="https://colony.merra.org/download/merra-survey-builder.html" download>Download</a>
+      </div>
+      <div class="dl">
+        <div><b>Merra Colony Counter app</b> <span class="muted">(zip)</span>
+          <p>The counter, the survey builder and instructions, for use on a computer without the internet or on your own web host.</p></div>
+        <a class="btn" href="https://colony.merra.org/download/merra-colony-counter.zip">Download zip</a>
+      </div>
+    </div>
+    <p class="muted" style="margin:12px 0 0">Version <span class="ver">__VERSION__</span>. You can always use the latest version online at <a href="https://colony.merra.org">colony.merra.org</a>.</p>
+  </section>
+
+  <section id="licence">
+    <h2>Free to use, with acknowledgement</h2>
+    <p>Merra Colony Counter is free for any purpose, including professional survey work. In return, please acknowledge it wherever its results appear:</p>
+    <div class="cite"><code>Counts were made with Merra Colony Counter (Merra, https://merra.org).</code></div>
+    <details>
+      <summary>The licence in full</summary>
+      <ol>
+        <li><b>Acknowledge Merra</b> when counts, time logs or other results made with Merra Colony Counter appear in a report, publication, presentation, dataset or website.</li>
+        <li><b>Keep the credit.</b> Do not remove or hide the Merra name, logo, the link to merra.org or this licence from the app, the survey builder, or any copy you share or publish, including survey apps made with the survey builder.</li>
+        <li><b>Say if you changed it.</b> A changed version must say clearly that it has been modified, keep this licence, and not be presented as made, endorsed or supported by Merra.</li>
+      </ol>
+      <p class="muted">The software is provided "as is", without warranty of any kind. Check counts that matter. Coastal Resources Management Group Ltd is not liable for any claim, damages or other liability arising from its use. Your photos, dots and counts stay on your device and are yours.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="row">
+    <span>© 2026 Coastal Resources Management Group Ltd, trading as <a href="https://merra.org">Merra</a>.</span>
+    <span>Questions or ideas: <a href="mailto:merra@merra.org?subject=Merra%20Colony%20Counter">merra@merra.org</a></span>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merra Colony Counter – Survey builder</title>
+<meta name="theme-color" content="#131e21">
+<style>
+  :root { --bg:#0d1517; --panel:#131e21; --fg:#e2ebe9; --muted:#92a6a8; --btn:#1c2b2f; --accent:#4fb3ba; --accent-ink:#062124; --ok:#74c487; --bad:#f2867e; --line:#26373b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+  h1 { font-size: 24px; margin: 0 0 4px; } h2 { font-size: 18px; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  section { background: var(--panel); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+  label.f { display:block; margin: 10px 0 4px; font-weight: 600; }
+  input[type=text], input[type=number], textarea { width:100%; border:0; border-radius:8px; background:var(--bg); color:var(--fg); font:inherit; padding:9px; }
+  textarea { min-height: 150px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .chk { display:flex; gap:8px; align-items:center; margin:6px 0; color: var(--fg); }
+  .btn { appearance:none; border:0; border-radius:8px; background:var(--btn); color:var(--fg); padding:10px 14px; font:inherit; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .btn.primary { background:var(--accent); color:var(--accent-ink); font-weight:700; }
+  .brandbar { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .brandbar img { width:44px; height:44px; border-radius:10px; }
+  .brandbar span { color:var(--muted); font-size:14px; line-height:1.25; }
+  .brandbar b { display:block; color:var(--fg); font-size:16px; }
+  a { color: var(--accent); }
+  footer { color:var(--muted); font-size:13px; border-top:1px solid var(--line); padding-top:16px; margin-top:8px; }
+  .btn:disabled { opacity:.4; cursor:default; }
+  .hint { color: var(--muted); font-size: 13px; }
+  table { width:100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+  th, td { text-align:left; padding:5px 6px; border-bottom:1px solid #ffffff14; }
+  th { color: var(--muted); font-weight: 600; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  ol.steps { margin: 6px 0 0 18px; padding: 0; } ol.steps li { margin: 4px 0; }
+  code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+  .scroll { max-height: 260px; overflow: auto; }
+</style>
+</head>
+<body>
+<main>
+  <a class="brandbar" href="https://colony.merra.org/about.html" style="text-decoration:none"><img id="logo" alt="Merra"><span><b>Merra Colony Counter</b>Survey builder</span></a>
+  <h1>Make a survey</h1>
+  <p class="sub">For survey organisers. Build a counting app with your photos, species list and instructions already inside, send it to your counters, then combine everyone's results. Your photos stay on this computer until you publish the app yourself.</p>
+
+  <section>
+    <h2>1 · Survey details</h2>
+    <label class="f" for="title">Survey title</label>
+    <input id="title" type="text" placeholder="e.g. Isle of May cliff count, June 2026">
+    <label class="f" for="sid">Survey ID <span class="hint">(letters, numbers and dashes; change it for a new survey so results never mix)</span></label>
+    <input id="sid" type="text">
+    <label class="f" for="species">Species list <span class="hint">(one per line, in the order shown to counters; keys 1–9 select the first nine)</span></label>
+    <textarea id="species">Guillemot
+Razorbill
+Kittiwake
+Shag
+Puffin
+Fulmar
+Herring Gull
+Lesser Black-backed Gull
+Great Black-backed Gull
+Cormorant
+Unidentified</textarea>
+    <label class="f" for="instr">Instructions for counters <span class="hint">(optional, shown when they start)</span></label>
+    <textarea id="instr" style="min-height:70px" placeholder="e.g. Count adults on ledges only; ignore birds in flight."></textarea>
+    <div class="chk"><input type="checkbox" id="askObs" checked><label for="askObs">Ask each counter for their name (recommended)</label></div>
+    <div class="chk"><input type="checkbox" id="lockSp" checked><label for="lockSp">Counters cannot change the species list</label></div>
+    <div class="chk"><input type="checkbox" id="ownImg"><label for="ownImg">Also allow counters to open their own photos</label></div>
+    <div class="row" style="margin-top:8px">
+      <label for="idle">Pause the clock after</label>
+      <input id="idle" type="number" min="15" max="600" value="60" style="width:90px">
+      <span>seconds without any input</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>2 · Survey photos</h2>
+    <div class="row">
+      <label class="btn">Choose photos…<input id="pick" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple hidden></label>
+      <label class="btn">Choose a folder…<input id="pickDir" type="file" webkitdirectory multiple hidden></label>
+      <span id="imgCount" class="hint">No photos yet</span>
+    </div>
+    <div class="scroll"><table id="imgTable" hidden><thead><tr><th>#</th><th>File</th><th>Size (px)</th><th>Pre-placed dots</th></tr></thead><tbody></tbody></table></div>
+    <label class="f">Pre-placed dots <span class="hint">(optional — e.g. a model's predictions or earlier counts for counters to check and correct)</span></label>
+    <div class="row">
+      <label class="btn">Load points CSV…<input id="pickPts" type="file" accept=".csv,text/csv" hidden></label>
+      <span id="ptsInfo" class="hint">CSV with columns image, species, x_px, y_px (the app's point export, or the trainer's points.csv)</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · Make the survey app</h2>
+    <p class="hint">This builds the complete counting app with your photos and settings already inside — nothing to copy or move by hand.</p>
+    <div class="row">
+      <button class="btn primary" id="buildZip" disabled>Download survey app (.zip)</button>
+      <button class="btn" id="buildDir" disabled>Save into a folder on this computer…</button>
+    </div>
+    <p id="buildMsg" class="hint" aria-live="polite"></p>
+    <div id="publish" class="hint" hidden>
+      <b style="color:var(--fg)">Send it to your counters — publish it as a web app:</b>
+      <ol class="steps">
+        <li>Go to <a href="https://app.netlify.com/drop" target="_blank" rel="noopener" style="color:var(--accent)">app.netlify.com/drop</a>
+            (free; sign up so the site stays up and isn't password-protected).</li>
+        <li>Drag the <b>zip file</b> (or the saved folder) onto the page. You get a web address such as
+            <code>https://something.netlify.app</code> — you can rename it in Site settings.</li>
+        <li>Email or message that address to the counters. They open it, enter their name and start counting.
+            On a phone or tablet they can choose <i>Add to Home Screen</i> / <i>Install app</i>; after the first visit the
+            photos are stored on the device and it works without signal.</li>
+        <li>When they finish they press <b>Save</b> and send you the file; combine them in step 4.</li>
+      </ol>
+      <p>To change the survey later, build again and drag the new zip onto your site's <i>Deploys</i> page — everyone gets the update
+         next time they open it. Keep the same Survey ID to keep counters' progress; use a new one for a new survey.</p>
+    </div>
+    <details style="margin-top:8px"><summary class="hint">Advanced</summary>
+      <p class="hint">Download only the settings file (<code>survey.js</code>) for a copy of the app you manage yourself.</p>
+      <button class="btn" id="build" disabled>Download survey.js only</button>
+    </details>
+  </section>
+
+  <section>
+    <h2>4 · Combine counters' results</h2>
+    <p class="hint">Ask each counter to press <b>Save</b> in the app and send you the <code>colony_backup_….json</code> file. Select them all here.</p>
+    <div class="row">
+      <label class="btn">Choose result files…<input id="pickRes" type="file" accept=".json,application/json" multiple hidden></label>
+      <button class="btn" id="dlCounts" disabled>Download combined counts CSV</button>
+      <button class="btn" id="dlTimes" disabled>Download combined time log CSV</button>
+    </div>
+    <div class="scroll"><table id="resTable" hidden><thead><tr><th>Observer</th><th>Survey</th><th>Images done</th><th>Birds</th><th>Total time</th><th>Saved</th></tr></thead><tbody></tbody></table></div>
+  </section>
+  <footer>
+    <p><b>Merra Colony Counter</b> is free to use. Please acknowledge it wherever its results appear:
+       <i>“Counts were made with Merra Colony Counter (Merra, https://merra.org).”</i>
+       The survey apps you make keep the Merra credit; see the licence in <a href="https://colony.merra.org/about.html#licence">About</a>.</p>
+    <p>© 2026 Coastal Resources Management Group Ltd, trading as <a href="https://merra.org">Merra</a> · <a href="mailto:merra@merra.org?subject=Merra%20Colony%20Counter">merra@merra.org</a> · version <span class="ver">__VERSION__</span></p>
+  </footer>
+</main>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const images = new Map();   // name -> {file, w, h}
+let preload = {};           // name -> [{x,y,s}]
+const results = [];         // loaded backups
+
+const slug = (t) => t.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').slice(0, 50);
+$('title').addEventListener('input', () => {
+  if (!$('sid').dataset.touched) $('sid').value = slug($('title').value) ? `${slug($('title').value)}` : '';
+});
+$('sid').addEventListener('input', () => { $('sid').dataset.touched = '1'; });
+
+function dims(file) {
+  return new Promise((res) => {
+    const u = URL.createObjectURL(file); const im = new Image();
+    im.onload = () => { res([im.naturalWidth, im.naturalHeight]); URL.revokeObjectURL(u); };
+    im.onerror = () => { res([0, 0]); URL.revokeObjectURL(u); };
+    im.src = u;
+  });
+}
+async function addImages(list) {
+  for (const f of list) {
+    if (!/\.(jpe?g|png)$/i.test(f.name)) continue;
+    if (images.has(f.name)) continue;
+    const [w, h] = await dims(f);
+    if (!w) continue;
+    images.set(f.name, { file: f.name, w, h, blob: f });
+  }
+  renderImages();
+}
+function renderImages() {
+  const tb = $('imgTable').querySelector('tbody'); tb.innerHTML = '';
+  const list = [...images.values()].sort((a, b) => a.file.localeCompare(b.file, undefined, { numeric: true }));
+  list.forEach((it, i) => {
+    const tr = document.createElement('tr');
+    const n = (preload[it.file] || []).length;
+    tr.innerHTML = `<td>${i + 1}</td><td></td><td>${it.w}×${it.h}</td><td>${n || '–'}</td>`;
+    tr.children[1].textContent = it.file;
+    tb.appendChild(tr);
+  });
+  $('imgTable').hidden = !list.length;
+  $('imgCount').textContent = list.length ? `${list.length} photo${list.length > 1 ? 's' : ''}` : 'No photos yet';
+  $('build').disabled = $('buildZip').disabled = $('buildDir').disabled = !list.length;
+}
+$('pick').onchange = (e) => addImages(e.target.files);
+$('pickDir').onchange = (e) => addImages(e.target.files);
+
+function parseCSV(text) {
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter((r) => r.length > 1);
+}
+$('pickPts').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const rows = parseCSV((await f.text()).replace(/^﻿/, ''));
+  const h = rows.shift().map((x) => x.trim().toLowerCase());
+  const ci = (n) => h.indexOf(n);
+  if (ci('image') < 0 || ci('species') < 0 || ci('x_px') < 0 || ci('y_px') < 0) {
+    $('ptsInfo').innerHTML = '<span class="bad">Needs columns image, species, x_px, y_px</span>'; return;
+  }
+  preload = {};
+  for (const r of rows) (preload[r[ci('image')]] ||= []).push({ x: +r[ci('x_px')], y: +r[ci('y_px')], s: r[ci('species')] });
+  const total = Object.values(preload).reduce((t, a) => t + a.length, 0);
+  const matched = Object.keys(preload).filter((n) => images.has(n)).length;
+  $('ptsInfo').innerHTML = `<span class="ok">${total} dots for ${Object.keys(preload).length} photos loaded</span>` +
+    (images.size ? ` — ${matched} match the chosen photos` : ' — now choose the photos');
+  renderImages();
+};
+
+function sortedImages() {
+  return [...images.values()].sort((a, b) => a.file.localeCompare(b.file, undefined, { numeric: true }));
+}
+function surveyJS() {
+  const id = slug($('sid').value || $('title').value) || `survey-${new Date().toISOString().slice(0, 10)}`;
+  const species = [...new Set($('species').value.split('\n').map((s) => s.trim()).filter(Boolean))];
+  const list = sortedImages().map(({ file, w, h }) => (preload[file] ? { file, w, h, points: preload[file] } : { file, w, h }));
+  const survey = {
+    id, title: $('title').value.trim() || id, instructions: $('instr').value.trim(),
+    species, askObserver: $('askObs').checked, lockSpecies: $('lockSp').checked,
+    allowOwnImages: $('ownImg').checked, idleSeconds: Math.max(15, +$('idle').value || 60),
+    created: new Date().toISOString(), images: list,
+  };
+  const text = '// Colony Counter survey file - made with admin.html. It lives in survey/ next to the app,\n' +
+               '// with the photos in survey/images/.\nself.SURVEY = ' + JSON.stringify(survey, null, 1) + ';\n';
+  return { id, text };
+}
+function saveBlob(name, blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+$('build').onclick = () => saveBlob('survey.js', new Blob([surveyJS().text], { type: 'text/javascript' }));
+
+// ---------- the complete app, embedded so this page works from disk too ----------
+const APP_FILES = /*APP_FILES*/{};
+const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+if (APP_FILES['icons/merra-192.png']) $('logo').src = 'data:image/png;base64,' + APP_FILES['icons/merra-192.png'];
+const enc = new TextEncoder();
+// Every file of the finished app (paths relative to the app folder), as Uint8Array / Blob.
+function appEntries(id) {
+  const out = [];
+  for (const [path, data] of Object.entries(APP_FILES)) {
+    let bytes = b64(data);
+    if (path === 'sw.js') {   // new cache name per build, so devices pick up changed photos
+      const stamp = new Date().toISOString().replace(/\D/g, '').slice(0, 14);
+      bytes = enc.encode(new TextDecoder().decode(bytes)
+        .replace(/const VERSION = '([^']*)';/, (m, v) => `const VERSION = '${v}-${id}-${stamp}';`));
+    }
+    out.push({ path, data: bytes });
+  }
+  return out;
+}
+const busy = (on, msg) => {
+  $('buildZip').disabled = $('buildDir').disabled = on || !images.size;
+  $('buildMsg').textContent = msg || '';
+};
+
+// --- minimal zip writer (stored, no compression: photos are already compressed) ---
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipBlob(entries) {   // entries: [{path, data: Uint8Array}]
+  const d = new Date();
+  const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  const date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  const parts = [], central = []; let offset = 0;
+  for (const e of entries) {
+    const nm = enc.encode(e.path), crc = crc32(e.data), sz = e.data.length;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
+    h.setUint16(10, time, true); h.setUint16(12, date, true); h.setUint32(14, crc, true);
+    h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, nm.length, true);
+    parts.push(h, nm, e.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+    c.setUint16(12, time, true); c.setUint16(14, date, true); c.setUint32(16, crc, true);
+    c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, nm.length, true); c.setUint32(42, offset, true);
+    central.push(c, nm);
+    offset += 30 + nm.length + sz;
+  }
+  const cdSize = central.reduce((t, p) => t + p.byteLength, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, entries.length, true); end.setUint16(10, entries.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, end], { type: 'application/zip' });
+}
+
+$('buildZip').onclick = async () => {
+  try {
+    const { id, text } = surveyJS();
+    busy(true, 'Packing photos…');
+    const entries = appEntries(id);
+    entries.push({ path: 'survey/survey.js', data: enc.encode(text) });
+    let i = 0;
+    for (const it of sortedImages()) {
+      busy(true, `Packing photo ${++i} of ${images.size}…`);
+      entries.push({ path: 'survey/images/' + it.file, data: new Uint8Array(await it.blob.arrayBuffer()) });
+    }
+    const zip = zipBlob(entries);
+    saveBlob(`merra-colony-counter_${id}.zip`, zip);
+    busy(false, `Downloaded merra-colony-counter_${id}.zip (${(zip.size / 1048576).toFixed(0)} MB, ${images.size} photos).` +
+      (zip.size > 50 * 1048576 ? ' It is over 50 MB, so the upload may take a few minutes.' : ''));
+    $('publish').hidden = false;
+  } catch (err) { busy(false, 'Could not build the zip: ' + err.message); }
+};
+
+// --- write straight into a folder (Chrome / Edge) ---
+if (!window.showDirectoryPicker) {
+  $('buildDir').title = 'Needs Chrome or Edge on a computer — use the zip instead';
+  $('buildDir').style.display = 'none';
+}
+async function writeFile(dir, path, data) {
+  const parts = path.split('/'); const name = parts.pop();
+  for (const p of parts) dir = await dir.getDirectoryHandle(p, { create: true });
+  const fh = await dir.getFileHandle(name, { create: true });
+  const w = await fh.createWritable(); await w.write(data); await w.close();
+}
+$('buildDir').onclick = async () => {
+  let root;
+  try { root = await window.showDirectoryPicker({ id: 'colony-survey', mode: 'readwrite' }); }
+  catch (err) { return; }   // cancelled
+  try {
+    const { id, text } = surveyJS();
+    busy(true, 'Writing the app…');
+    for (const e of appEntries(id)) await writeFile(root, e.path, e.data);
+    await writeFile(root, 'survey/survey.js', text);
+    const imgDir = await (await root.getDirectoryHandle('survey', { create: true })).getDirectoryHandle('images', { create: true });
+    let i = 0;
+    for (const it of sortedImages()) {
+      busy(true, `Copying photo ${++i} of ${images.size}…`);
+      await writeFile(imgDir, it.file, it.blob);
+    }
+    // tidy: photos left over from an earlier survey are removed from survey/images
+    const keep = new Set(images.keys()); let removed = 0;
+    for await (const [name, h] of imgDir.entries()) {
+      if (h.kind === 'file' && !keep.has(name)) { try { await imgDir.removeEntry(name); removed++; } catch (e) { /* ignore */ } }
+    }
+    busy(false, `Saved the app and ${images.size} photos into the folder "${root.name}"` +
+      (removed ? ` (removed ${removed} old file${removed > 1 ? 's' : ''} from survey/images)` : '') +
+      '. Double-click index.html in that folder to try it, then drag the folder onto Netlify Drop to publish it.');
+    $('publish').hidden = false;
+  } catch (err) { busy(false, 'Could not write to that folder: ' + err.message); }
+};
+
+// ---------- combine results ----------
+const fmt = (ms) => { const s = Math.round((ms || 0) / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const minutes = (ms) => Math.round((ms || 0) / 600) / 100;
+$('pickRes').onchange = async (e) => {
+  for (const f of e.target.files) {
+    try {
+      const d = JSON.parse(await f.text());
+      if (!d.images) throw 0;
+      d._file = f.name; results.push(d);
+    } catch (err) { alert(`${f.name} is not a Colony Counter save file`); }
+  }
+  const tb = $('resTable').querySelector('tbody'); tb.innerHTML = '';
+  for (const d of results) {
+    const imgs = Object.values(d.images);
+    const tr = document.createElement('tr');
+    [d.observer || '(no name)', d.surveyTitle || d.surveyId || '–',
+     `${imgs.filter((r) => r.done).length}/${imgs.length}`,
+     imgs.reduce((t, r) => t + r.points.length, 0),
+     fmt(imgs.reduce((t, r) => t + (r.timeMs || 0), 0)), (d.savedAt || '').slice(0, 16).replace('T', ' ')]
+      .forEach((v) => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+    tb.appendChild(tr);
+  }
+  $('resTable').hidden = !results.length;
+  $('dlCounts').disabled = $('dlTimes').disabled = !results.length;
+  e.target.value = '';
+};
+const cell = (v) => { const s = v == null ? '' : String(v); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+const csv = (rows) => rows.map((r) => r.map(cell).join(',')).join('\r\n') + '\r\n';
+function download(name, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+const byName = (a, b) => a.localeCompare(b, undefined, { numeric: true });
+$('dlCounts').onclick = () => {
+  const rows = [['survey', 'observer', 'image', 'species', 'count', 'minutes_spent', 'status']];
+  for (const d of results) for (const n of Object.keys(d.images).sort(byName)) {
+    const r = d.images[n]; const c = {};
+    for (const p of r.points) c[p.s] = (c[p.s] || 0) + 1;
+    const st = r.done ? 'done' : (r.timeMs || r.points.length ? 'in progress' : 'not started');
+    const sp = Object.keys(c);
+    if (!sp.length && r.done) rows.push([d.surveyId || '', d.observer || '', n, '(no birds)', 0, minutes(r.timeMs), st]);
+    for (const s of sp) rows.push([d.surveyId || '', d.observer || '', n, s, c[s], minutes(r.timeMs), st]);
+  }
+  download('combined_counts.csv', csv(rows));
+};
+$('dlTimes').onclick = () => {
+  const rows = [['survey', 'observer', 'image', 'minutes_spent', 'seconds_spent', 'status', 'birds', 'sessions', 'first_opened', 'last_active', 'done_at']];
+  for (const d of results) for (const n of Object.keys(d.images).sort(byName)) {
+    const r = d.images[n];
+    rows.push([d.surveyId || '', d.observer || '', n, minutes(r.timeMs), Math.round((r.timeMs || 0) / 1000),
+      r.done ? 'done' : (r.timeMs || r.points.length ? 'in progress' : 'not started'),
+      r.points.length, r.sessions || 0, r.firstOpened || '', r.lastActive || '', r.doneAt || '']);
+  }
+  download('combined_time_log.csv', csv(rows));
+};
+</script>
+</body>
+</html>

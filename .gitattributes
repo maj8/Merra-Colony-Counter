@@ -1,0 +1,20 @@
+# Line endings are decided here, not by whichever computer makes the commit.
+# Everything text is stored with Unix (LF) line endings, so a commit from
+# Windows can never rewrite the files or break the shell scripts on the server.
+* text=auto eol=lf
+
+# Shell scripts must always be LF, even if someone's tools think otherwise.
+*.sh text eol=lf
+
+# Windows batch files need CRLF to run correctly on Windows.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Images and archives are never touched.
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary
+
+# Third-party libraries are kept byte for byte as published.
+app/lib/** -text

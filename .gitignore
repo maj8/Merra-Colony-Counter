@@ -1,0 +1,22 @@
+# Never commit what the build makes. The deploy builds these fresh every time.
+dist/
+*.zip
+version.json
+
+# Editor and system clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.tmp
+*.log
+node_modules/
+
+# Trainer: Python environment, datasets and training runs are made locally
+trainer/.venv/
+trainer/dataset/
+trainer/runs/
+trainer/results/
+__pycache__/
+*.pt

@@ -1,0 +1,22 @@
+image,birds,minutes,method
+(00) Test.png,1,0.1,approx: single bird
+(01) IMG_0984_crop3.jpg,18,3.0,approx: reconstructed from file timestamps
+(02) IMG_1000_crop1.jpg,29,1.5,timer: image opened to dots checked
+(03)IMG_0984_crop1.jpg,9,0.3,timer: image opened to dots checked
+(04) IMG_0974_crop0.jpg,14,0.3,timer: image opened to dots checked
+(05) IMG_0977_crop1.jpg,33,0.3,timer: image opened to dots checked
+(06) IMG_0976_crop2.jpg,98,5.2,timer: image opened to dots checked
+(07) IMG_0992_crop2.jpg,101,2.4,timer: image opened to dots checked
+(08) IMG_0987_crop1.jpg,124,3.8,timer: image opened to dots checked
+(09) IMG_0995_crop2.jpg,143,1.0,timer: image opened to dots checked
+(10) IMG_0984_crop2.jpg,162,2.4,timer: image opened to dots checked
+(11) IMG_0794_crop3.jpg,20,0.2,timer: image opened to dots checked
+(12) IMG_0892_crop2.jpg,18,0.3,timer: image opened to dots checked
+(13) IMG_0794_crop1.jpg,30,0.4,timer: image opened to dots checked
+(14) IMG_0925_crop3.jpg,7,0.3,timer: image opened to dots checked
+(15) IMG_0934_crop2.jpg,22,0.3,timer: image opened to dots checked
+(16) IMG_1389_crop0.jpg,190,2.6,timer: image opened to dots checked
+(17) IMG_1391_crop1.jpg,237,2.3,timer: image opened to dots checked
+(18) IMG_1395_crop2.jpg,335,2.1,timer: image opened to dots checked
+(19) IMG_1404_crop0.jpg,228,2.0,timer: image opened to dots checked
+(20) IMG_1404_crop3.jpg,191,1.9,timer: image opened to dots checked

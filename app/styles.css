@@ -1,0 +1,94 @@
+:root {
+  /* Merra colours (dark: photos read best on a dark ground) */
+  --bg: #0d1517;
+  --bar: #131e21;
+  --fg: #e2ebe9;
+  --muted: #92a6a8;
+  --btn: #1c2b2f;
+  --btn-hi: #26373b;
+  --accent: #4fb3ba;
+  --accent-ink: #062124;
+  --danger: #c4483e;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+  font: 15px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+
+.bar { background: var(--bar); padding: 6px 8px; flex: none; }
+.bar.top { padding-top: max(6px, env(safe-area-inset-top)); }
+.bar.bottom { display: flex; align-items: center; gap: 8px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+.row { display: flex; align-items: center; gap: 6px; }
+.row + .row { margin-top: 6px; }
+.row.end { justify-content: flex-end; margin-top: 10px; }
+
+.btn { appearance: none; border: 0; border-radius: 8px; background: var(--btn); color: var(--fg);
+  padding: 9px 12px; font: inherit; cursor: pointer; white-space: nowrap; user-select: none;
+  display: inline-flex; align-items: center; justify-content: center; min-height: 40px; }
+.btn:hover { background: var(--btn-hi); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary:hover { background: #6cc4ca; }
+.btn.danger { background: var(--danger); }
+.btn.icon { width: 40px; padding: 0; font-size: 22px; }
+.btn.wide { width: 100%; margin: 4px 0; }
+.btn:disabled { opacity: .4; cursor: default; }
+
+select { flex: 1; min-width: 0; min-height: 40px; border-radius: 8px; border: 0;
+  background: var(--btn); color: var(--fg); font: inherit; padding: 0 8px; }
+
+.species { flex-wrap: wrap; gap: 6px; padding-bottom: 2px; }
+.species::-webkit-scrollbar { display: none; }
+.chip { flex: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px;
+  border: 2px solid transparent; background: var(--btn); color: var(--fg); padding: 3px 10px 3px 7px;
+  font: inherit; font-size: 14px; cursor: pointer; min-height: 32px; }
+.chip .sw { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; }
+.chip .n { background: rgba(0,0,0,.3); border-radius: 999px; padding: 0 7px; font-variant-numeric: tabular-nums; }
+.chip[aria-checked="true"] { border-color: var(--accent); background: var(--btn-hi); font-weight: 600; }
+
+main { position: relative; flex: 1; min-height: 0; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; cursor: crosshair; }
+.empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; color: var(--muted); padding: 24px; pointer-events: none; }
+.empty strong { color: var(--fg); }
+
+.status { flex: 1; text-align: center; color: var(--muted); font-size: 13px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+
+dialog { background: var(--bar); color: var(--fg); border: 0; border-radius: 14px; width: min(420px, 92vw); padding: 16px; }
+dialog::backdrop { background: rgba(0,0,0,.6); }
+dialog h2 { margin: 0 0 10px; font-size: 18px; }
+.hint { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+textarea { width: 100%; border-radius: 8px; border: 0; background: var(--bg); color: var(--fg); font: inherit; padding: 8px; }
+
+.toast { position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%); background: #000c;
+  color: #fff; padding: 8px 14px; border-radius: 8px; pointer-events: none; z-index: 10; }
+
+/* v3: survey header, timer, done state */
+.survey-title { font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.progress { color: var(--muted); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.timer { font-variant-numeric: tabular-nums; color: var(--fg); font-size: 14px; white-space: nowrap; min-width: 64px; text-align: right; }
+.timer.paused { color: var(--muted); }
+#doneBtn[aria-pressed="true"] { background: #2e7d32; }
+.done-banner { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: #2e7d32cc;
+  color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 13px; pointer-events: none; }
+dialog input[type=text] { width: 100%; border-radius: 8px; border: 0; background: var(--bg); color: var(--fg);
+  font: inherit; padding: 10px; }
+@media (max-width: 560px) {
+  .bar.bottom { flex-wrap: wrap; }
+  .bar.bottom .status { order: 10; flex-basis: 100%; }
+}
+
+.err { color: #ffb4a8; font-weight: 400; }
+.empty strong { font-size: 16px; }
+
+/* Merra brand */
+.brand { display: inline-flex; align-items: center; gap: 7px; color: var(--fg); text-decoration: none;
+  font-weight: 700; white-space: nowrap; padding-right: 4px; min-height: 40px; }
+.brand img { width: 30px; height: 30px; border-radius: 7px; display: block; }
+.brand small { display: block; font-weight: 500; font-size: 11px; color: var(--muted); line-height: 1.1; }
+.brand b { display: block; line-height: 1.1; }
+.credit { color: var(--muted); font-size: 13px; }
+.credit a, .empty a { color: var(--accent); }
+@media (max-width: 720px) { .brand .brand-text { display: none; } }

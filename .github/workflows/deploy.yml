@@ -1,0 +1,151 @@
+# Deploys Merra Colony Counter to https://colony.merra.org whenever the app changes.
+#
+# A red run means nothing reached anyone: colony.merra.org keeps the version
+# it had. Read the FIRST red step; the ones after it fail because it did.
+#
+# Needs two repository secrets (Settings > Secrets and variables > Actions):
+#   MERRA_DEPLOY_KEY   the private deploy key made on the server
+#   MERRA_DEPLOY_HOST  159.69.206.162
+name: Deploy to colony.merra.org
+
+on:
+  push:
+    branches: [main]
+    # Every folder that can change what is served or how it is deployed.
+    paths:
+      - "app/**"
+      - "builder/**"
+      - "docs/**"
+      - "LICENSE.md"
+      - "deploy/**"
+      - "tests/**"
+      - "scripts/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "What to do"
+        type: choice
+        options:
+          - deploy
+          - deploy again even if this version is already live
+          - go back to the previous version
+        default: deploy
+
+# One deploy at a time; a newer push waits for the one in progress.
+concurrency:
+  group: colony-merra-org
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the checks
+        run: bash scripts/check.sh
+      - name: Read the version
+        id: v
+        run: echo "version=$(bash scripts/check.sh --version)" >> "$GITHUB_OUTPUT"
+      - name: Build the release
+        run: bash scripts/build.sh
+      - name: Test the server install script
+        run: bash tests/test-install.sh
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test the app, about page and survey builder in a real browser
+        run: |
+          pip install -q playwright
+          python -m playwright install --with-deps chromium >/dev/null
+          python tests/e2e.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.v.outputs.version }}
+          path: dist/*.tar.gz
+          retention-days: 30
+
+  deploy:
+    name: Deploy ${{ needs.check.outputs.version }}
+    needs: check
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      ACTION: ${{ github.event.inputs.action || 'deploy' }}
+      HAS_KEY: ${{ secrets.MERRA_DEPLOY_KEY != '' && secrets.MERRA_DEPLOY_HOST != '' }}
+    steps:
+      - name: Deploy key present?
+        id: keys
+        run: |
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "::warning title=Not deployed::The MERRA_DEPLOY_KEY and MERRA_DEPLOY_HOST secrets are not set yet, so nothing was sent to the server. The checks and build above still ran."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.keys.outputs.ready == 'true'
+
+      - uses: actions/download-artifact@v4
+        if: steps.keys.outputs.ready == 'true'
+        with:
+          name: release-${{ env.VERSION }}
+          path: dist
+
+      - name: Connect to the server
+        if: steps.keys.outputs.ready == 'true'
+        env:
+          KEY: ${{ secrets.MERRA_DEPLOY_KEY }}
+          HOST: ${{ secrets.MERRA_DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          ssh-keyscan -T 20 -t ed25519 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          {
+            echo "Host merra"
+            echo "  HostName $HOST"
+            echo "  User merra"
+            echo "  IdentityFile ~/.ssh/deploy"
+            echo "  IdentitiesOnly yes"
+            echo "  ConnectTimeout 20"
+          } > ~/.ssh/config
+          ssh merra 'mkdir -p ~/deploy/colony && echo "Connected as $(id -un) on $(hostname)"'
+
+      - name: Send and switch over
+        if: steps.keys.outputs.ready == 'true' && env.ACTION != 'go back to the previous version'
+        run: |
+          B="merra-colony-counter-$VERSION.tar.gz"
+          scp -q deploy/install-release.sh "dist/$B" merra:deploy/colony/
+          FORCE=0; [ "$ACTION" = "deploy again even if this version is already live" ] && FORCE=1
+          ssh merra "FORCE=$FORCE bash deploy/colony/install-release.sh deploy/colony/$B"
+
+      - name: Go back to the previous version
+        if: steps.keys.outputs.ready == 'true' && env.ACTION == 'go back to the previous version'
+        run: |
+          scp -q deploy/install-release.sh merra:deploy/colony/
+          ssh merra "bash deploy/colony/install-release.sh --rollback"
+
+      - name: Check colony.merra.org from outside
+        if: steps.keys.outputs.ready == 'true' && env.ACTION != 'go back to the previous version'
+        run: |
+          got=$(curl -fsS "https://colony.merra.org/version.json?ci=$GITHUB_RUN_ID" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
+          echo "colony.merra.org says: $got"
+          [ "$got" = "$VERSION" ] || { echo "::error::Expected $VERSION"; exit 1; }
+          mkdir -p chk && tar -xzf "dist/merra-colony-counter-$VERSION.tar.gz" -C chk
+          for f in index.html app.js sw.js about.html survey-builder.html; do
+            a=$(sha256sum "chk/$f" | cut -d' ' -f1)
+            b=$(curl -fsS "https://colony.merra.org/$f?ci=$GITHUB_RUN_ID" | sha256sum | cut -d' ' -f1)
+            [ "$a" = "$b" ] && echo "ok: $f matches" || { echo "::error::$f on the site differs from the build"; exit 1; }
+          done
+          echo "### Live: https://colony.merra.org is serving $VERSION" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tidy up the key
+        if: always()
+        run: rm -f ~/.ssh/deploy
