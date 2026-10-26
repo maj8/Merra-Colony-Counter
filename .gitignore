@@ -20,3 +20,12 @@ trainer/runs/
 trainer/results/
 __pycache__/
 *.pt
+trainer/results_val/
+trainer/annotations/val_photos.txt
+trainer/annotations/*_before_import.csv
+trainer/annotations/import_report.csv
+trainer/annotations/counts.csv
+trainer/photos/*
+!trainer/photos/PUT_COUNTED_PHOTOS_HERE.txt
+trainer/new_photos/*
+!trainer/new_photos/PUT_NEW_PHOTOS_HERE.txt

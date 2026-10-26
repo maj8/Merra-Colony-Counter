@@ -1,0 +1,2 @@
+Put the photos you have counted in Merra Colony Counter in this folder (subfolders are fine).
+The file names must be exactly the same as when you counted them.

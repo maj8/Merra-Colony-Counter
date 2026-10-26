@@ -14,5 +14,7 @@ notice and the attribution "Merra Colony Counter training kit (Merra, https://me
 Using Ultralytics YOLO in closed-source or commercial products may need an Ultralytics
 Enterprise licence; see https://www.ultralytics.com/license.
 
-The starter annotations in `annotations/` and `editor/start_dots.js` are dot positions for the
+The example annotations in `examples/isle-of-may/` are dot positions for the
 Isle of May photos. The photos themselves are not in this repository.
+
+Questions: merra@merra.org

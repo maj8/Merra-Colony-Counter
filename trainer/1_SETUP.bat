@@ -1,4 +1,5 @@
 @echo off
+rem Merra Colony Counter training kit - step 1 (https://colony.merra.org, merra@merra.org).
 rem One-off setup: creates a private Python environment in this folder and installs the
 rem deep-learning libraries (PyTorch + Ultralytics YOLO). Takes 5-15 minutes, needs internet.
 cd /d "%~dp0"
@@ -20,7 +21,7 @@ if %errorlevel%==0 (
 pip install ultralytics pillow numpy
 python -c "import torch; print('PyTorch', torch.__version__, '| GPU:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none')"
 echo.
-echo Setup finished. Next: double-click 2_TRAIN.bat
+echo Setup finished. Next: count photos in Merra Colony Counter, then double-click 2_IMPORT_COUNTS.bat
 pause
 exit /b 0
 

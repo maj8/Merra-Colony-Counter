@@ -77,7 +77,8 @@ def main():
     names = model.names
     os.makedirs(f'{a.out}/annotated', exist_ok=True)
     all_pts, sizes = {}, {}
-    backup = {'species': SPECIES[:], 'images': {}, 'current': 0}
+    backup = {'app': 'colony-counter', 'generator': 'Merra Colony Counter training kit (merra.org)',
+              'observer': 'model', 'species': SPECIES[:], 'images': {}, 'current': 0}
 
     only = {n.strip() for n in a.only.split(',') if n.strip()}
     for name, path in find_images(a.images).items():

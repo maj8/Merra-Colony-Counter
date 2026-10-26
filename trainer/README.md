@@ -1,54 +1,58 @@
 # Merra Colony Counter – detector training kit
 
-Trains an object-detection model (Ultralytics YOLO) to find and identify cliff-nesting seabirds,
-using dot annotations from the Colony Counter app (or Claude's annotations, which use the same format).
-Once trained, it counts new photos by itself and produces the same outputs as the app:
-a master `counts.csv`, a `points.csv` of every bird, dotted photos, and a backup file
-that opens in the app so a person can check and correct the model's dots.
+**Experimental.** Teaches a computer to count seabirds in your colony photos, using photos you have
+already counted in [Merra Colony Counter](https://colony.merra.org). Once trained, it counts new photos by
+itself and gives the same outputs as the app: a counts CSV, every bird's position, dotted photos, and a
+save file that opens in Merra Colony Counter so a person can check and correct its dots.
+
+Free from [Merra](https://merra.org). If you use it, please acknowledge
+*"Merra Colony Counter training kit (Merra, https://merra.org)"*. Questions or results to share:
+**merra@merra.org**. Licence: `LICENSE.md` (GNU AGPL-3.0, because it uses Ultralytics YOLO).
+
+## You need
+
+- A Windows PC with Python 3.9 or newer (https://www.python.org/downloads/, tick *Add to PATH*).
+  An NVIDIA graphics card makes training take minutes instead of hours. No NVIDIA card? Use
+  `train_colony.ipynb` in Google Colab (free GPU) instead.
+- Photos you have counted in Merra Colony Counter, and its save file(s). Twenty photos is a start;
+  results improve steadily up to a few hundred.
+
+## Steps
+
+1. **Count photos** in Merra Colony Counter (https://colony.merra.org, or a survey made with the survey builder).
+   Press **Save** when finished: it saves a `colony_backup_….json` file to your Downloads folder.
+2. **Put the counted photos in the `photos` folder** of this kit, with the same file names.
+3. **1_SETUP.bat**: one-off, 5–15 minutes. Installs the deep-learning libraries into this folder only.
+4. **2_IMPORT_COUNTS.bat**: collects your counts from the save files (in Downloads, or next to the photos)
+   into `annotations/points.csv`. It adds a line per photo to `annotations/bird_sizes.csv`: open that file and
+   fill in **size_px**, the length of a typical bird in that photo in pixels (see *Why dots become boxes*).
+5. **3_TRAIN.bat**: trains, then tests on the photos held back in `annotations/val_photos.txt` (about one in
+   five, picked the first time) and reports the count error and accuracy.
+6. **4_COUNT_NEW_PHOTOS.bat**: put new photos in `new_photos`, run it, and open `results/counts.csv`.
+
+Run 2 and 3 again whenever you have counted or corrected more photos. **5_RETEST.bat** re-runs only the test.
 
 ## What's in the folder
 
 ```
-colony-trainer/
-  train_colony.ipynb      ← open this in Google Colab and run the cells in order
-  images/                 ← original photos (file names must match the CSV exactly)
+merra-colony-trainer/
+  1_SETUP.bat … 5_RETEST.bat   the steps above
+  photos/                      your counted photos (subfolders are fine)
+  new_photos/                  photos for the trained model to count
   annotations/
-    points.csv            ← one row per bird: image,species,x_px,y_px,image_width,image_height
-    bird_sizes.csv        ← typical bird size (pixels) per photo, optionally per species
-  scripts/
-    build_dataset.py      ← dots → tiled YOLO training set
-    predict.py            ← trained model → counts, points, dotted photos, app backup
-    evaluate.py           ← compare model dots with reference dots (count error, recall, precision)
-    draw_annotations.py   ← redraw dotted photos from any points CSV
-    common.py
-  new_photos/             ← (create it) photos you want the trained model to count
+    points.csv                 one row per bird: image,species,x_px,y_px,image_width,image_height
+    bird_sizes.csv             typical bird size (pixels) per photo, optionally per species
+    val_photos.txt             photos held back for testing (made by 3_TRAIN; edit to choose your own)
+  scripts/                     the Python behind the steps
+  train_colony.ipynb           the same, in Google Colab
 ```
 
-## Training on your Windows PC (recommended if it has an NVIDIA graphics card)
-
-This folder should sit inside your `countpics` folder, next to the Batch folders — the scripts find the
-photos there automatically.
-
-1. **1_SETUP.bat** – one-off, 5–15 min. Creates a private Python environment here and installs PyTorch
-   (GPU version if an NVIDIA card is found) and Ultralytics YOLO. Needs Python 3.9+ installed.
-2. **2_TRAIN.bat** – builds the training set, trains the detector, then tests it on the three held-back
-   photos (04), (10) and (17) and prints the count error and F1 score. ~20–60 min on a GPU; many hours on CPU.
-3. **3_COUNT_NEW_PHOTOS.bat** – put new photos in `new_photos`, double-click, and get `results/counts.csv`
-   (plus points, dotted photos and an app backup file).
-
-No NVIDIA GPU? Use `train_colony.ipynb` in Google Colab instead (free GPU) – instructions are in the notebook.
-
-## Correcting the annotations before training
-
-Each Batch folder contains `claude_annotations.pnt` – Claude's dots for the photos in that folder.
-Open it in DotDotGoose, fix missed or wrong birds, and **save** (keep it in the same folder).
-Then double-click **1b_IMPORT_CORRECTIONS.bat**: it reads every .pnt (and any Colony Counter app backup
-.json) in the countpics folders, updates `annotations/points.csv`, keeps the old version as
-`points_before_import.csv`, and prints what changed per photo. Then run 2_TRAIN.bat.
+If `photos` is empty, the kit looks for photos in the folder it sits in instead, so you can also drop the
+whole kit inside your photo folder.
 
 ## Why dots become boxes
 
-Detectors learn from boxes, but people (and the app) place dots. `build_dataset.py` turns each dot into a
+Detectors learn from boxes, but people (and Merra Colony Counter) place dots. `build_dataset.py` turns each dot into a
 square box of the size given in `bird_sizes.csv`. Sizes only need to be roughly right — measure a typical
 bird in each photo (head-to-tail, in pixels). Use `*` as the species for a photo-wide default, and add a
 species row where one species is noticeably bigger (e.g. Kittiwakes among Guillemots).
@@ -70,11 +74,10 @@ represent your real work, including at least one dense ledge.
 
 ## Adding more training data
 
-The best route is the app itself:
-1. Count photos in the Colony Counter app (or load a model's `app_backup.json` and correct it).
-2. ⋮ → **Export point locations (CSV)**.
-3. Append those rows to `annotations/points.csv`, copy the photos into `images/`, add sizes to
-   `bird_sizes.csv`, and retrain.
+1. Count more photos in Merra Colony Counter, or correct the model's dots: open the photos at
+   https://colony.merra.org, then Menu → **Restore from backup** → `results/app_backup.json`.
+2. Press **Save**, copy the photos into `photos/`, run **2_IMPORT_COUNTS.bat**, fill in the new bird sizes,
+   and run **3_TRAIN.bat** again.
 
 Correcting the model's own predictions is much faster than counting from scratch, and every corrected
 photo makes the next model better.
@@ -87,25 +90,21 @@ photo makes the next model better.
 - **Rare species.** A species with only a handful of examples (e.g. Shag) will be detected poorly until it
   has dozens. Common species (Guillemot, Kittiwake, Razorbill) learn first.
 - **'Unidentified' dots** are not learned as a species; those areas are blanked out of the training tiles.
-- **Label quality sets the ceiling.** The starter annotations were made by Claude. Spot-check them in the app
-  before relying on the model, especially dense Guillemot ledges where individuals overlap.
-- **Licence.** Ultralytics YOLO is AGPL-3.0: free for research and non-commercial use; publishing a modified
-  service built on it requires releasing your source, and commercial closed use needs an Ultralytics licence.
+- **Label quality sets the ceiling.** The model can only be as good as the counts it learns from. Check
+  dense ledges, where individuals overlap, especially carefully.
 - **Tiling.** Photos are processed in 1024-px tiles with 256-px overlap. If your birds are tiny (<25 px),
   crop tighter photos; if very large (>400 px), you can resize photos down before annotating.
 
-## Running from a command line
+## Running from a command line (Windows, Mac or Linux)
 
 ```
 pip install ultralytics
-python scripts/build_dataset.py --images images --points annotations/points.csv --sizes annotations/bird_sizes.csv --out dataset --val "(10) IMG_0984_crop2.jpg"
-yolo detect train data=dataset/data.yaml model=yolo11s.pt imgsz=1024 epochs=150 patience=40
-python scripts/predict.py --model runs/detect/train/weights/best.pt --images new_photos --out results
+python scripts/import_annotations.py          # photos in ./photos
+python scripts/train.py                       # --model yolo11n.pt for a quick try
+python scripts/predict.py --model runs/colony/weights/best.pt --images new_photos --out results
 ```
-A computer with an NVIDIA GPU trains in minutes; CPU-only training works but takes hours.
 
-## Starter annotations in this kit
+## The Isle of May example
 
-`annotations/points.csv` holds Claude's dot annotations for all 21 photos in the countpics folder (2,010 birds).
-The same dots are in `claude_annotations.pnt` (delivered alongside this kit) for checking in DotDotGoose.
-`annotations/count_timings.csv` records how long each photo took to annotate.
+`examples/isle-of-may/` holds the dots for the 21 Isle of May photos the kit was first developed on
+(2,010 birds), their bird sizes and held-back photos. The photos themselves are not included.

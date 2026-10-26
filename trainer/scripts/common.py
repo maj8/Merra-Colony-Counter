@@ -1,4 +1,4 @@
-"""Shared helpers for the Colony Counter trainer."""
+"""Shared helpers for the Merra Colony Counter training kit (https://colony.merra.org)."""
 import csv
 import os
 from collections import defaultdict
@@ -51,20 +51,24 @@ def write_counts(path, pts):
 
 
 def read_sizes(path):
-    """bird_sizes.csv: image,species,size_px.  species '*' = default for that image.
+    """bird_sizes.csv: image,species,size_px[,note].  species '*' = default for that image.
+    Rows with an empty size are ignored (they are reminders to measure).
     Returns lookup(image, species) -> size in pixels (None if unknown)."""
     table = {}
     if path and os.path.exists(path):
         with open(path, newline='', encoding='utf-8-sig') as f:
             for r in csv.DictReader(f):
-                table[(r['image'], r['species'].strip())] = float(r['size_px'])
+                try:
+                    table[(r['image'], (r.get('species') or '*').strip())] = float(r['size_px'])
+                except (TypeError, ValueError):
+                    pass
 
     def lookup(image, species):
         return table.get((image, species)) or table.get((image, '*'))
     return lookup
 
 
-SKIP_DIRS = {'colony-trainer', 'dataset', 'runs', 'results', 'results_val', 'annotated', '.venv', 'new_photos_done'}
+SKIP_DIRS = {'colony-trainer', 'merra-colony-trainer', 'examples', 'dataset', 'runs', 'results', 'results_val', 'annotated', '.venv', 'new_photos_done'}
 
 
 def find_images(folder):
@@ -80,6 +84,20 @@ def find_images(folder):
                     continue
                 found[f] = os.path.join(root, f)
     return dict(sorted(found.items()))
+
+
+KIT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def resolve_images(arg='auto'):
+    """Where the counted photos are. 'auto': the kit's photos folder if it holds any photos,
+    otherwise the folder the kit sits in (e.g. a folder of photos with the kit inside it)."""
+    if arg and arg != 'auto':
+        return arg
+    own = os.path.join(KIT, 'photos')
+    if os.path.isdir(own) and find_images(own):
+        return own
+    return os.path.dirname(KIT)
 
 
 def list_images(folder):

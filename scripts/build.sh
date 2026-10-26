@@ -6,6 +6,7 @@
 #     LICENSE.md
 #     download/merra-survey-builder.html   the builder, as a download
 #     download/merra-colony-counter.zip    the app + builder + user guide
+#     download/merra-colony-trainer.zip    the detector training kit
 #     version.json
 #     SHA256SUMS                           fingerprint of every file, checked on the server
 #   dist/merra-colony-counter-<version>.tar.gz   the bundle sent to the server
@@ -28,6 +29,12 @@ cp dist/release/survey-builder.html dist/release/download/merra-survey-builder.h
 ( cd dist/release && tar --exclude=./download -cf - . ) | tar -xf - -C dist/zip/merra-colony-counter
 cp docs/USER-GUIDE.md dist/zip/merra-colony-counter/README.md
 ( cd dist/zip && zip -q -r -X ../release/download/merra-colony-counter.zip merra-colony-counter )
+
+# The training kit (Windows; AGPL-3.0). The Isle of May example data stays in the repository only.
+mkdir -p dist/zip/merra-colony-trainer
+( cd trainer && tar --exclude=./examples --exclude=./.venv --exclude=./runs --exclude=./dataset \
+    --exclude=./results --exclude=./results_val --exclude='__pycache__' -cf - . ) | tar -xf - -C dist/zip/merra-colony-trainer
+( cd dist/zip && zip -q -r -X ../release/download/merra-colony-trainer.zip merra-colony-trainer )
 rm -rf dist/zip
 
 printf '{"app":"merra-colony-counter","version":"%s","released":"%s"}\n' "$VERSION" "$RELEASED" > dist/release/version.json

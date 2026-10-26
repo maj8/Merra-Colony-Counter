@@ -55,6 +55,7 @@ with sync_playwright() as pw:
     pg.goto(base + "/")
     check(pg.is_visible("a.brand") and "Colony Counter" in pg.inner_text("a.brand"), "counter shows the Merra Colony Counter brand")
     check("merra.org" in pg.inner_text("#empty"), "counter shows the acknowledgement line")
+    check("merra@merra.org" in pg.inner_text("#empty"), "counter shows the contact address")
     check(pg.title() == "Merra Colony Counter", "page title")
     pg.set_input_files("#fileInput", photos)
     pg.wait_for_selector("#observerDlg[open]", timeout=10000)
@@ -72,8 +73,17 @@ with sync_playwright() as pw:
     pg.goto(base + "/about.html")
     check(VERSION in pg.inner_text("body"), f"about page shows version {VERSION}")
     check(pg.locator("a[href*='download/merra-survey-builder.html']").count() == 1, "about page links the builder download")
-    for f in ("download/merra-survey-builder.html", "download/merra-colony-counter.zip", "survey-builder.html", "LICENSE.md"):
+    check(pg.locator("a[href*='download/merra-colony-trainer.zip']").count() == 1, "about page links the training kit")
+    check(pg.locator("a[href^='mailto:merra@merra.org']").count() >= 1, "about page gives merra@merra.org")
+    for f in ("download/merra-survey-builder.html", "download/merra-colony-counter.zip", "download/merra-colony-trainer.zip", "survey-builder.html", "LICENSE.md"):
         check((REL / f).is_file(), f"{f} is in the release")
+
+    with zipfile.ZipFile(REL / "download" / "merra-colony-trainer.zip") as z:
+        names = set(z.namelist())
+    for f in ("merra-colony-trainer/1_SETUP.bat", "merra-colony-trainer/2_IMPORT_COUNTS.bat", "merra-colony-trainer/3_TRAIN.bat",
+              "merra-colony-trainer/scripts/train.py", "merra-colony-trainer/LICENSE.md", "merra-colony-trainer/photos/PUT_COUNTED_PHOTOS_HERE.txt"):
+        check(f in names, f"training kit contains {f.split('/', 1)[1]}")
+    check(not any("/examples/" in n or "__pycache__" in n for n in names), "training kit leaves out the example data and caches")
 
     # 3. Survey builder (opened from disk, as an organiser would after downloading it).
     pg.goto((REL / "download" / "merra-survey-builder.html").as_uri())

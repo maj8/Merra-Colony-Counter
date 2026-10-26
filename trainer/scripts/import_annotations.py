@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""Rebuild annotations/points.csv from corrected annotations.
+"""Rebuild annotations/points.csv from your counts.
 
-Reads, from the photo folder and all its subfolders:
+Reads, from the photo folder and all its subfolders, and from your Downloads folder:
+  - Merra Colony Counter save files (colony_backup_*.json, from the app's Save button)
   - DotDotGoose project files (*.pnt)
-  - Colony Counter app backups (*.json with an "images" section)
 For every photo, the most recently saved file that contains it wins. Photos not found in any
 file keep their current dots. The old points.csv is kept as points_before_import.csv, and a
 per-photo summary of what changed is printed and saved to annotations/import_report.csv.
 
-Example (from the colony-trainer folder):
-  python scripts/import_annotations.py --images ..
+Photos that are new to bird_sizes.csv get a row there with an empty size, as a reminder to
+measure a typical bird in that photo.
+
+Example (from the kit folder):
+  python scripts/import_annotations.py            (photos in ./photos, or the folder above)
 """
 import argparse
 import csv
@@ -20,9 +23,9 @@ from collections import Counter
 
 from PIL import Image
 
-from common import SPECIES, find_images, read_points, write_counts, write_points
+from common import SPECIES, find_images, read_points, resolve_images, write_counts, write_points
 
-SKIP = {'colony-trainer', 'dataset', 'runs', 'results', 'results_val', '.venv'}
+SKIP = {'colony-trainer', 'merra-colony-trainer', 'examples', 'dataset', 'runs', 'results', 'results_val', '.venv'}
 
 
 def canon(name):
@@ -56,9 +59,12 @@ def read_app_backup(path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--images', default='..')
+    ap.add_argument('--images', default='auto', help="photo folder; 'auto' = ./photos if it has photos, else the folder above")
     ap.add_argument('--points', default='annotations/points.csv')
+    ap.add_argument('--sizes', default='annotations/bird_sizes.csv')
     a = ap.parse_args()
+    a.images = resolve_images(a.images)
+    print(f'Photos: {os.path.abspath(a.images)}')
 
     sources = []   # (mtime, path, {img: pts})
     for root, dirs, files in os.walk(a.images):
@@ -129,8 +135,34 @@ def main():
         w = csv.writer(f)
         w.writerow(['image', 'birds_before', 'birds_after', 'changes', 'source'])
         w.writerows(rows)
-    print(f'\nWrote {a.points} ({sum(len(v) for v in new.values())} birds). '
-          f'Previous version saved as points_before_import.csv. Now run 2_TRAIN.bat.')
+    todo = add_size_reminders(a.sizes, [i for i in new if new[i]])
+    print(f'\nWrote {a.points} ({sum(len(v) for v in new.values())} birds on {sum(1 for v in new.values() if v)} photos). '
+          f'Previous version saved as points_before_import.csv.')
+    if todo:
+        print(f'\n{len(todo)} photo(s) have no bird size yet. Open {a.sizes} and fill in size_px for each:\n'
+              '  the length of a typical bird in that photo, in pixels (any image viewer shows pixel positions).\n'
+              '  Rough is fine. Until then 120 px is used.')
+    print('Next: 3_TRAIN.bat')
+
+
+def add_size_reminders(path, images):
+    """Add an empty bird_sizes.csv row for every photo without one. Returns photos still without a size."""
+    rows, have = [], set()
+    if os.path.exists(path):
+        with open(path, newline='', encoding='utf-8-sig') as f:
+            rows = list(csv.DictReader(f))
+    for r in rows:
+        have.add(r.get('image'))
+    added = [i for i in sorted(images) if i not in have]
+    for i in added:
+        rows.append({'image': i, 'species': '*', 'size_px': '', 'note': 'measure a typical bird (pixels)'})
+    if added:
+        with open(path, 'w', newline='') as f:
+            w = csv.DictWriter(f, fieldnames=['image', 'species', 'size_px', 'note'], extrasaction='ignore')
+            w.writeheader()
+            w.writerows(rows)
+    sized = {r['image'] for r in rows if (r.get('size_px') or '').strip()}
+    return [i for i in images if i not in sized]
 
 
 if __name__ == '__main__':

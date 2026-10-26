@@ -65,15 +65,34 @@ jobs:
           pip install -q playwright
           python -m playwright install --with-deps chromium >/dev/null
           python tests/e2e.py
+      - name: Test the training kit's preparation steps
+        run: |
+          pip install -q pillow numpy
+          python tests/test_trainer_prep.py
       - uses: actions/upload-artifact@v4
         with:
           name: release-${{ steps.v.outputs.version }}
           path: dist/*.tar.gz
           retention-days: 30
 
+  trainer:
+    name: Training kit (1-epoch training run)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyTorch (CPU) and Ultralytics YOLO, as 1_SETUP.bat does
+        run: |
+          pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -q ultralytics pillow numpy
+      - name: Import, train, test and count with the kit
+        run: python tests/test_trainer_prep.py --train
+
   deploy:
     name: Deploy ${{ needs.check.outputs.version }}
-    needs: check
+    needs: [check, trainer]
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.check.outputs.version }}

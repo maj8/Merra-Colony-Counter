@@ -4,6 +4,7 @@ Tap-to-count seabirds in colony photos, by species, with a dot on every bird.
 Free to use from **https://colony.merra.org**, made by [Merra](https://merra.org).
 Please acknowledge it wherever its results appear:
 *"Counts were made with Merra Colony Counter (Merra, https://merra.org)."* The licence is in `LICENSE.md`.
+Questions, ideas or results to share: **merra@merra.org**.
 
 ---
 

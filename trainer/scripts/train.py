@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Train the seabird detector, then test it on the held-back photos.
+"""Train the seabird detector, then test it on the held-back photos (Merra Colony Counter training kit).
 
 Runs the whole pipeline in one go:
   1. build the tiled training set from annotations/points.csv
@@ -8,17 +8,54 @@ Runs the whole pipeline in one go:
   4. compare those counts with the reference dots, at several confidence thresholds,
      and save the best threshold to runs/colony/best_conf.txt
 
-Example (from the colony-trainer folder):
-  python scripts/train.py --images ..
+The held-back photos are listed in annotations/val_photos.txt. If that file does not exist,
+about one photo in five is picked at random and written there, so later runs (and 5_RETEST)
+test on the same photos. Edit the file to choose your own: pick photos typical of your work,
+including at least one dense ledge.
+
+Example (from the kit folder):
+  python scripts/train.py                 (photos in ./photos, or the folder above)
 """
 import argparse
 import os
 import subprocess
 import sys
 
+import random
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 KIT = os.path.dirname(HERE)
-DEFAULT_VAL = '(04) IMG_0974_crop0.jpg,(10) IMG_0984_crop2.jpg,(17) IMG_1391_crop1.jpg'
+sys.path.insert(0, HERE)
+from common import find_images, read_points, resolve_images  # noqa: E402
+
+VAL_FILE = os.path.join(KIT, 'annotations', 'val_photos.txt')
+
+
+def choose_val(images):
+    """The held-back photos: annotations/val_photos.txt, or a random fifth written there."""
+    pts = read_points(os.path.join(KIT, 'annotations', 'points.csv'))
+    on_disk = find_images(images)
+    usable = sorted(i for i in pts if pts[i] and i in on_disk)
+    if len(usable) < 2:
+        raise SystemExit(f'Only {len(usable)} counted photo(s) found with their photo in {os.path.abspath(images)}. '
+                         'At least 2 are needed (ideally 20 or more). Run 2_IMPORT_COUNTS.bat first.')
+    if os.path.exists(VAL_FILE):
+        val = [ln.strip() for ln in open(VAL_FILE, encoding='utf-8-sig') if ln.strip()]
+        bad = [v for v in val if v not in usable]
+        if bad:
+            raise SystemExit(f'{VAL_FILE} lists photos that are not counted or not found: {bad}. '
+                             'Fix the names, or delete the file to have photos picked automatically.')
+    else:
+        rnd = random.Random(0)
+        val = sorted(rnd.sample(usable, max(1, round(len(usable) * 0.2))))
+        with open(VAL_FILE, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(val) + '\n')
+        print(f'Held back for testing (saved in annotations/val_photos.txt): {", ".join(val)}')
+    if len(val) >= len(usable):
+        raise SystemExit('Every counted photo is held back for testing; leave some for training.')
+    if any(',' in v for v in val):
+        raise SystemExit('A held-back photo has a comma in its file name; please rename it.')
+    return ','.join(val)
 
 
 def run(args):
@@ -28,14 +65,18 @@ def run(args):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--images', default='..', help='folder holding the annotated photos (subfolders searched)')
-    ap.add_argument('--val', default=DEFAULT_VAL, help='photos held back for testing')
+    ap.add_argument('--images', default='auto', help="folder of counted photos (subfolders searched); 'auto' = ./photos if it has photos, else the folder above")
+    ap.add_argument('--val', default='auto', help="comma-separated photos held back for testing; 'auto' = annotations/val_photos.txt")
     ap.add_argument('--model', default='yolo11s.pt', help='yolo11n.pt (fast) / yolo11s.pt / yolo11m.pt (best, slow)')
     ap.add_argument('--epochs', type=int, default=150)
     ap.add_argument('--imgsz', type=int, default=1024)
     ap.add_argument('--batch', type=int, default=0, help='0 = automatic')
     ap.add_argument('--skip-train', action='store_true', help='only re-run the testing step')
     a = ap.parse_args()
+    a.images = resolve_images(a.images)
+    print(f'Photos: {os.path.abspath(a.images)}')
+    if a.val == 'auto':
+        a.val = choose_val(a.images)
 
     import torch
     from ultralytics import YOLO
