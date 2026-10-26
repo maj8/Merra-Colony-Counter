@@ -18,6 +18,9 @@
   .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
   header.hero { padding: 36px 0 28px; border-bottom: 1px solid var(--line);
     background: radial-gradient(1200px 300px at 20% 0%, #14353a 0%, transparent 70%); }
+  [hidden] { display:none !important; }
+  .back { display:inline-block; margin-bottom:16px; color: var(--muted); text-decoration:none; font-size:14px; }
+  .back:hover { color: var(--fg); }
   .mark { display:flex; align-items:center; gap:14px; margin-bottom:18px; text-decoration:none; color:var(--fg); }
   .mark img { width:52px; height:52px; border-radius:12px; }
   .mark span { font-size:14px; color:var(--muted); line-height:1.25; }
@@ -60,13 +63,14 @@
 <body>
 <header class="hero">
   <div class="wrap">
+    <a class="back" id="back" href="./">&larr; Back to counting</a>
     <a class="mark" href="https://merra.org" rel="noopener"><img src="icons/merra-192.png" alt="Merra"><span><b>Merra</b>merra.org</span></a>
     <h1>Merra Colony Counter</h1>
-    <p class="lead">Count seabirds in colony photos, species by species. Tap each bird, get the counts.
-      <b>Free to use</b>, on a computer, tablet or phone, with or without a signal.</p>
+    <p class="lead">Set up a seabird count for your team: everyone counts the same photos, species by species,
+      and you get one set of counts back. <b>Free to use</b>, on a computer, tablet or phone, with or without a signal.</p>
     <div class="actions">
-      <a class="btn primary" href="./">Open the counter</a>
-      <a class="btn" href="https://colony.merra.org/survey-builder.html">Make a survey for a team</a>
+      <a class="btn primary" href="https://colony.merra.org/">Set up a survey</a>
+      <a class="btn" href="https://colony.merra.org/counter/">Try the counter</a>
       <a class="btn" href="#download">Downloads</a>
     </div>
   </div>
@@ -79,7 +83,6 @@
       <div class="card"><h3>Tap to count</h3><p>Pick a species and tap each bird. Every bird keeps its dot, so nothing is counted twice or missed. Zoom right in on dense ledges.</p></div>
       <div class="card"><h3>Counts by photo and species</h3><p>One master CSV of photo, species and count, plus every dot's position so the counted photos can be redrawn or checked.</p></div>
       <div class="card"><h3>Time on each photo</h3><p>Records how long each counter spends on each photo, adding up across sessions and pausing when they stop.</p></div>
-      <div class="card"><h3>Teach a computer to count</h3><p>The training kit learns from the photos you have counted, then counts new photos by itself for you to check and correct.</p></div>
       <div class="card"><h3>Private and offline</h3><p>Photos and counts stay on the device. Nothing is uploaded to Merra. Once opened, it keeps working without a signal.</p></div>
     </div>
   </section>
@@ -87,7 +90,7 @@
   <section>
     <h2>Running a survey with a team</h2>
     <ol class="flow">
-      <li><b>Build the survey.</b> <span>In the survey builder, add a title, the species list, instructions and your photos. It makes a complete survey app in one zip.</span></li>
+      <li><b>Set up the survey.</b> <span>On <a href="https://colony.merra.org/">colony.merra.org</a>, add a title, the species list, instructions and your photos. It makes a complete survey app in one zip.</span></li>
       <li><b>Publish it.</b> <span>Drag the zip onto a web host such as Netlify Drop to get a web address for it.</span></li>
       <li><b>Send the address.</b> <span>Counters open it, enter their name and count the same photos. On phones and tablets they can add it to the home screen.</span></li>
       <li><b>Combine the results.</b> <span>Counters press Save and send you their file. The survey builder merges them into one counts CSV and one time log.</span></li>
@@ -98,19 +101,14 @@
     <h2>Downloads</h2>
     <div class="card">
       <div class="dl">
-        <div><b>Survey builder</b> <span class="muted">(one file, everything included)</span>
-          <p>Double-click it in Chrome, Edge, Firefox or Safari. It builds survey apps and combines results.</p></div>
+        <div><b>Survey set-up page</b> <span class="muted">(one file, everything included)</span>
+          <p>The same as colony.merra.org, to use without the internet. Double-click it in Chrome, Edge, Firefox or Safari.</p></div>
         <a class="btn primary" href="https://colony.merra.org/download/merra-survey-builder.html" download>Download</a>
       </div>
       <div class="dl">
-        <div><b>Merra Colony Counter app</b> <span class="muted">(zip)</span>
-          <p>The counter, the survey builder and instructions, for use on a computer without the internet or on your own web host.</p></div>
+        <div><b>Merra Colony Counter</b> <span class="muted">(zip)</span>
+          <p>The survey set-up page, the counter and the user guide.</p></div>
         <a class="btn" href="https://colony.merra.org/download/merra-colony-counter.zip">Download zip</a>
-      </div>
-      <div class="dl">
-        <div><b>Training kit</b> <span class="muted">(zip, experimental, Windows)</span>
-          <p>Teaches a computer to count your photos, using photos you have counted here. Needs Python, and ideally an NVIDIA graphics card (or free Google Colab). Licensed GNU AGPL-3.0 because it uses Ultralytics YOLO.</p></div>
-        <a class="btn" href="https://colony.merra.org/download/merra-colony-trainer.zip">Download zip</a>
       </div>
     </div>
     <p class="muted" style="margin:12px 0 0">Version <span class="ver">__VERSION__</span>. You can always use the latest version online at <a href="https://colony.merra.org">colony.merra.org</a>.
@@ -121,7 +119,6 @@
     <h2>Free to use, with acknowledgement</h2>
     <p>Merra Colony Counter is free for any purpose, including professional survey work. In return, please acknowledge it wherever its results appear:</p>
     <div class="cite"><code>Counts were made with Merra Colony Counter (Merra, https://merra.org).</code></div>
-    <p class="muted">The training kit is free too, under the GNU AGPL-3.0 (it builds on Ultralytics YOLO). Please acknowledge it as <i>Merra Colony Counter training kit (Merra, https://merra.org)</i>.</p>
     <details>
       <summary>The licence in full</summary>
       <ol>
@@ -140,5 +137,9 @@
     <span>Questions or ideas: <a href="mailto:merra@merra.org?subject=Merra%20Colony%20Counter">merra@merra.org</a></span>
   </div>
 </footer>
+<script>
+  // On colony.merra.org itself this page is reached from the survey set-up page, so there is no counter to go back to.
+  if (location.hostname === 'colony.merra.org' && !location.pathname.startsWith('/counter/')) document.getElementById('back').hidden = true;
+</script>
 </body>
 </html>

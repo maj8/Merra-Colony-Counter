@@ -52,7 +52,7 @@ PY
 [ "$missing" = 0 ] && ok "every offline file listed in sw.js exists"
 
 # 4. The core files are there.
-for f in app/index.html app/app.js app/styles.css app/about.html app/manifest.json builder/survey-builder.src.html LICENSE.md; do
+for f in app/index.html app/app.js app/styles.css app/about.html app/manifest.json builder/survey-builder.src.html builder/root-sw.js LICENSE.md; do
   [ -f "$f" ] || bad "$f is missing"
 done
 
@@ -75,10 +75,6 @@ PY
   rm -f "$tmp"
 fi
 
-# 6b. The training kit's Python compiles.
-if python3 -m py_compile trainer/scripts/*.py 2>/dev/null; then ok "training kit scripts compile"; else bad "a training kit script has a Python syntax error"; fi
-find trainer -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
-
 # 7. The Merra credit is present where the licence says it must be.
 grep -q 'href="about.html"' app/index.html && grep -q 'merra.org' app/about.html \
   && grep -q 'Merra Colony Counter' builder/survey-builder.src.html \
@@ -89,7 +85,7 @@ crlf="$(grep -rlI $'\r' app builder scripts deploy 2>/dev/null || true)"
 [ -z "$crlf" ] && ok "no Windows line endings" || bad "Windows line endings in: $crlf"
 
 # 9. Nothing built has been committed.
-built="$(find app builder -name '*.zip' -o -name version.json -o -name survey-builder.html | head -5)"
+built="$(find app builder -name '*.zip' -o -name version.json | head -5)"
 [ -z "$built" ] && ok "no built files committed" || bad "built files must not be committed: $built"
 
 echo

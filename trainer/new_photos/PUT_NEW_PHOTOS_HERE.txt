@@ -1,1 +1,0 @@
-Put the photos you want the trained model to count in this folder, then run 4_COUNT_NEW_PHOTOS.bat.

@@ -36,7 +36,7 @@ grep -q "colony.merra.org {" "$T/srv/gateway/conf/sites.d/colony.caddy" && grep 
 out="$(bash $INSTALL "$(bundle v9.0.0)" 2>&1)"; [ $? -ne 0 ] && grep -q "already live" <<<"$out" && ok "same version is refused" || bad "same version is refused"
 FORCE=1 bash $INSTALL "$(bundle v9.0.0)" >/dev/null 2>&1 && [ "$(live)" = releases/v9.0.0 ] && ok "same version with FORCE" || bad "same version with FORCE"
 
-b="$(bundle v9.0.1)"; mkdir -p "$T/x" && tar -xzf "$b" -C "$T/x" && echo tampered >> "$T/x/app.js" && tar -C "$T/x" -czf "$b" .
+b="$(bundle v9.0.1)"; mkdir -p "$T/x" && tar -xzf "$b" -C "$T/x" && echo tampered >> "$T/x/counter/app.js" && tar -C "$T/x" -czf "$b" .
 out="$(bash $INSTALL "$b" 2>&1)"; [ $? -ne 0 ] && grep -q "changed in transit" <<<"$out" && [ "$(live)" = releases/v9.0.0 ] \
   && ok "a damaged bundle is refused and nothing changes" || bad "a damaged bundle is refused and nothing changes"
 

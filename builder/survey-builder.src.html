@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Merra Colony Counter – Survey builder</title>
+<title>Merra Colony Counter – set up a seabird count survey</title>
+<meta name="description" content="Free from Merra: set up a seabird colony photo count for a team. Add your photos and species list, get a counting app to send to your counters, then combine everyone's counts and times.">
+<link rel="icon" id="favicon">
 <meta name="theme-color" content="#131e21">
 <style>
   :root { --bg:#0d1517; --panel:#131e21; --fg:#e2ebe9; --muted:#92a6a8; --btn:#1c2b2f; --accent:#4fb3ba; --accent-ink:#062124; --ok:#74c487; --bad:#f2867e; --line:#26373b; }
@@ -35,13 +37,29 @@
   ol.steps { margin: 6px 0 0 18px; padding: 0; } ol.steps li { margin: 4px 0; }
   code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
   .scroll { max-height: 260px; overflow: auto; }
+  .topnav { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .topnav nav { display:flex; gap:16px; font-size:14px; }
+  .topnav nav a { color: var(--muted); text-decoration:none; } .topnav nav a:hover { color: var(--fg); }
+  .how { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin: 0 0 22px; padding:0; list-style:none; counter-reset:h; }
+  .how li { counter-increment:h; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 12px 12px 46px; position:relative; font-size:14px; color:var(--muted); }
+  .how li b { color: var(--fg); display:block; }
+  .how li::before { content:counter(h); position:absolute; left:12px; top:12px; width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-weight:700; display:grid; place-items:center; font-size:13px; }
 </style>
 </head>
 <body>
 <main>
-  <a class="brandbar" href="https://colony.merra.org/about.html" style="text-decoration:none"><img id="logo" alt="Merra"><span><b>Merra Colony Counter</b>Survey builder</span></a>
-  <h1>Make a survey</h1>
-  <p class="sub">For survey organisers. Build a counting app with your photos, species list and instructions already inside, send it to your counters, then combine everyone's results. Your photos stay on this computer until you publish the app yourself.</p>
+  <div class="topnav">
+    <a class="brandbar" href="https://colony.merra.org/" style="text-decoration:none;margin:0"><img id="logo" alt="Merra"><span><b>Merra Colony Counter</b>Free from Merra</span></a>
+    <nav><a href="https://colony.merra.org/about.html">About</a><a href="https://colony.merra.org/counter/">Try the counter</a><a href="mailto:merra@merra.org?subject=Merra%20Colony%20Counter">Contact</a></nav>
+  </div>
+  <h1>Set up a seabird count survey</h1>
+  <p class="sub">Give every counter the same photos and species list, and get back one set of counts, with the time each person spent on each photo. Free to use; your photos stay on this computer until you publish the survey yourself.</p>
+  <ol class="how">
+    <li><b>Set up</b>Title, species, instructions and photos, below.</li>
+    <li><b>Make the survey app</b>One zip with everything inside.</li>
+    <li><b>Send it out</b>Publish the zip and send counters the web address.</li>
+    <li><b>Combine results</b>Counters send their Save file; merge them here.</li>
+  </ol>
 
   <section>
     <h2>1 · Survey details</h2>
@@ -81,10 +99,10 @@ Unidentified</textarea>
       <span id="imgCount" class="hint">No photos yet</span>
     </div>
     <div class="scroll"><table id="imgTable" hidden><thead><tr><th>#</th><th>File</th><th>Size (px)</th><th>Pre-placed dots</th></tr></thead><tbody></tbody></table></div>
-    <label class="f">Pre-placed dots <span class="hint">(optional — e.g. a model's predictions or earlier counts for counters to check and correct)</span></label>
+    <label class="f">Pre-placed dots <span class="hint">(optional — e.g. earlier counts for counters to check and correct)</span></label>
     <div class="row">
       <label class="btn">Load points CSV…<input id="pickPts" type="file" accept=".csv,text/csv" hidden></label>
-      <span id="ptsInfo" class="hint">CSV with columns image, species, x_px, y_px (the app's point export, or the trainer's points.csv)</span>
+      <span id="ptsInfo" class="hint">CSV with columns image, species, x_px, y_px (the app's point-locations export)</span>
     </div>
   </section>
 
@@ -241,6 +259,7 @@ $('build').onclick = () => saveBlob('survey.js', new Blob([surveyJS().text], { t
 const APP_FILES = /*APP_FILES*/{};
 const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 if (APP_FILES['icons/merra-192.png']) $('logo').src = 'data:image/png;base64,' + APP_FILES['icons/merra-192.png'];
+if (APP_FILES['icons/merra-favicon-64.png']) $('favicon').href = 'data:image/png;base64,' + APP_FILES['icons/merra-favicon-64.png'];
 const enc = new TextEncoder();
 // Every file of the finished app (paths relative to the app folder), as Uint8Array / Blob.
 function appEntries(id) {

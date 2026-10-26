@@ -2,7 +2,7 @@
 
 The source of **https://colony.merra.org**: a free tool for counting seabirds in colony photos,
 species by species. Counters tap each bird; the app keeps a dot on every bird and produces a master
-counts CSV, every dot's position, and how long each person spent on each photo. A survey builder
+counts CSV, every dot's position, and how long each person spent on each photo. The front page, the survey set-up,
 packs a fixed set of photos, a species list and instructions into a ready-to-publish survey app for
 a team, and combines everyone's results.
 
@@ -16,17 +16,15 @@ This repository is the master copy. What is in `main` is what colony.merra.org s
 
 | Folder | What it is | Served at |
 |---|---|---|
-| `app/` | the counter (installable web app, works offline) and the About / downloads page | colony.merra.org/, /about.html |
-| `builder/` | the survey builder; the build embeds the whole app in it, so the one file can make survey apps even when opened from disk | colony.merra.org/survey-builder.html |
+| `builder/` | the survey set-up page (the front page). The build embeds the whole counter in it, so the one file can make survey apps even when opened from disk | colony.merra.org/ |
+| `app/` | the counter (installable web app, works offline) and the About / downloads page; every survey app is this plus the survey | colony.merra.org/counter/, /about.html |
 | `docs/USER-GUIDE.md` | instructions for organisers and counters (the README inside the downloadable zip) | in the zip |
-| `trainer/` | detector training kit (Windows, Ultralytics YOLO) that learns from counted photos. AGPL-3.0, see `trainer/LICENSE.md`. `trainer/examples/isle-of-may/` (the first training data) is not in the download | download/merra-colony-trainer.zip |
 | `scripts/`, `deploy/`, `tests/` | checks, build, server install, tests | – |
 
 Downloads made by every build, linked from colony.merra.org/about.html:
 
-- `download/merra-survey-builder.html`: the survey builder as one file
-- `download/merra-colony-counter.zip`: app, builder, user guide and licence
-- `download/merra-colony-trainer.zip`: the training kit
+- `download/merra-survey-builder.html`: the survey set-up page as one file
+- `download/merra-colony-counter.zip`: survey set-up page, counter, user guide and licence
 
 ## Making a change
 
@@ -49,7 +47,7 @@ read the **first** red step; the ones after it failed because it did.
 |---|---|---|
 | Check | `scripts/check.sh`: version readable, offline files exist, JavaScript parses, Merra credit present, nothing built committed | Nothing is built or sent |
 | Build | `scripts/build.sh`: the site, the survey builder with the app embedded, the downloads, `version.json`, a fingerprint of every file | Nothing is sent |
-| Test | `tests/test-install.sh` (server install script, in a throwaway folder), `tests/e2e.py` (counter, about page, survey builder and a survey app it makes, in Chromium) and `tests/test_trainer_prep.py` (training kit: import, sizes, held-back photos, training set; plus a 1-epoch training and counting run) | Nothing is sent |
+| Test | `tests/test-install.sh` (server install script, in a throwaway folder) and `tests/e2e.py` (counter, about page, survey builder and a survey app it makes, in Chromium) | Nothing is sent |
 | Send | Copies the bundle to the server and runs `deploy/install-release.sh`, which checks every file arrived byte for byte | Nothing is switched |
 | Switch | Puts the version in `/srv/merra/www/colony/releases/<version>/` and points `current` at it in one step. Writes colony.merra.org's front-door settings (`sites.d/colony.caddy`) on the first deploy, or when they change | Refused settings are put back |
 | Confirm | Asks colony.merra.org for its version, from the server and from outside, and compares files with the build | The previous version is put back automatically |

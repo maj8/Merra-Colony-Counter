@@ -3,7 +3,7 @@
 Copyright © 2026 Coastal Resources Management Group Ltd, trading as Merra (https://merra.org).
 
 This licence covers the Merra Colony Counter app, the survey builder and their documentation
-(everything in this repository except the `trainer/` folder, which has its own licence).
+(everything in this repository).
 
 ## Free to use, with acknowledgement
 

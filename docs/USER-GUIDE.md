@@ -10,13 +10,13 @@ Questions, ideas or results to share: **merra@merra.org**.
 
 ## For the administrator: setting up and sending out a survey
 
-Everything is done in **`survey-builder.html`** (the survey builder: online at https://colony.merra.org/survey-builder.html, or download it from https://colony.merra.org/about.html). It contains the whole app, so it is the only
+Everything is done in **`survey-builder.html`** (the survey set-up page: online at https://colony.merra.org, or download it from https://colony.merra.org/about.html). It contains the whole app, so it is the only
 file you need — double-click it in Chrome, Edge, Firefox or Safari.
 
 1. **Survey details** – title, species list, instructions for counters, and options.
    Each new survey gets a new **Survey ID** so results never mix.
 2. **Survey photos** – choose the photos (or a folder). Optionally load a points CSV to pre-place dots
-   for counters to check (e.g. a model's predictions, or the trainer's `points.csv`).
+   for counters to check (e.g. earlier counts, in the app's point-locations CSV format).
 3. **Make the survey app** – press **Download survey app (.zip)**. The zip is the complete, ready-to-publish
    app with your photos and settings inside; nothing needs copying or moving.
    (In Chrome/Edge you can instead **Save into a folder** – handy for trying it on your own computer:
@@ -42,7 +42,6 @@ In `survey-builder.html` → **Combine counters' results**, select all of them, 
 - `combined_time_log.csv` — survey, observer, image, minutes/seconds spent, status, birds, sessions,
   first_opened, last_active, done_at
 
-The same backup files can be fed to the detector-training kit (`1b_IMPORT_CORRECTIONS.bat` reads them).
 
 ---
 

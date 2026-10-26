@@ -51,8 +51,15 @@ with sync_playwright() as pw:
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
 
-    # 1. The counter, as colony.merra.org serves it (no survey: open-your-own-photos mode).
+    # 0. The front page is the survey set-up.
     pg.goto(base + "/")
+    check(pg.locator("h1").inner_text() == "Set up a seabird count survey", "the front page is the survey set-up")
+    check(pg.locator("#buildZip").count() == 1 and pg.locator("#title").count() == 1, "the front page has the set-up form")
+    check(pg.locator("a[href='https://colony.merra.org/counter/']").count() >= 1, "the front page links to the counter")
+    check(pg.locator("a[href^='mailto:merra@merra.org']").count() >= 1, "the front page gives merra@merra.org")
+
+    # 1. The counter on its own (no survey: open-your-own-photos mode).
+    pg.goto(base + "/counter/")
     check(pg.is_visible("a.brand") and "Colony Counter" in pg.inner_text("a.brand"), "counter shows the Merra Colony Counter brand")
     check("merra.org" in pg.inner_text("#empty"), "counter shows the acknowledgement line")
     check("merra@merra.org" in pg.inner_text("#empty"), "counter shows the contact address")
@@ -73,17 +80,10 @@ with sync_playwright() as pw:
     pg.goto(base + "/about.html")
     check(VERSION in pg.inner_text("body"), f"about page shows version {VERSION}")
     check(pg.locator("a[href*='download/merra-survey-builder.html']").count() == 1, "about page links the builder download")
-    check(pg.locator("a[href*='download/merra-colony-trainer.zip']").count() == 1, "about page links the training kit")
     check(pg.locator("a[href^='mailto:merra@merra.org']").count() >= 1, "about page gives merra@merra.org")
-    for f in ("download/merra-survey-builder.html", "download/merra-colony-counter.zip", "download/merra-colony-trainer.zip", "survey-builder.html", "LICENSE.md"):
+    check(pg.locator("a[href='https://colony.merra.org/']").count() >= 1, "about page leads to the survey set-up")
+    for f in ("download/merra-survey-builder.html", "download/merra-colony-counter.zip", "index.html", "counter/index.html", "LICENSE.md", "sw.js"):
         check((REL / f).is_file(), f"{f} is in the release")
-
-    with zipfile.ZipFile(REL / "download" / "merra-colony-trainer.zip") as z:
-        names = set(z.namelist())
-    for f in ("merra-colony-trainer/1_SETUP.bat", "merra-colony-trainer/2_IMPORT_COUNTS.bat", "merra-colony-trainer/3_TRAIN.bat",
-              "merra-colony-trainer/scripts/train.py", "merra-colony-trainer/LICENSE.md", "merra-colony-trainer/photos/PUT_COUNTED_PHOTOS_HERE.txt"):
-        check(f in names, f"training kit contains {f.split('/', 1)[1]}")
-    check(not any("/examples/" in n or "__pycache__" in n for n in names), "training kit leaves out the example data and caches")
 
     # 3. Survey builder (opened from disk, as an organiser would after downloading it).
     pg.goto((REL / "download" / "merra-survey-builder.html").as_uri())
@@ -124,6 +124,7 @@ with sync_playwright() as pw:
     check(pg2.locator("a.brand").count() == 1, "survey app keeps the Merra credit")
     s2.shutdown()
 
+    check(not (REL / "download" / "merra-colony-trainer.zip").exists(), "no training kit download")
     check(not errors, "no JavaScript errors" + (f": {errors}" if errors else ""))
     b.close()
 site.shutdown()

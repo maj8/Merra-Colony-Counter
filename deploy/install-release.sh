@@ -70,6 +70,9 @@ $SITE_HOST {
 		Referrer-Policy "strict-origin-when-cross-origin"
 		-Server
 	}
+	# The survey set-up page used to be /survey-builder.html; it is now the front page.
+	redir /survey-builder.html / 301
+
 	# Files under /download/ are saved, not opened in the browser.
 	@download path /download/*
 	header @download Content-Disposition "attachment"
