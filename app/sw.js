@@ -1,7 +1,7 @@
 // Offline support. App files: network first (so updates arrive), cached copy when offline.
 // Survey images: cached on install and served from the cache.
-const VERSION = 'v1.2.0';   // the app's version: change it for every release (installed copies update when it changes)
-const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.json', 'about.html',
+const VERSION = 'v1.3.0';   // the app's version: change it for every release (installed copies update when it changes)
+const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'survey-file.js', 'manifest.json', 'about.html',
   'icons/merra-192.png', 'icons/merra-512.png', 'icons/merra-maskable-192.png', 'icons/merra-maskable-512.png',
   'icons/merra-favicon-64.png', 'icons/merra-apple-touch-180.png'];
 

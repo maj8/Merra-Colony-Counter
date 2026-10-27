@@ -92,3 +92,15 @@ dialog input[type=text] { width: 100%; border-radius: 8px; border: 0; background
 .credit { color: var(--muted); font-size: 13px; }
 .credit a, .empty a { color: var(--accent); }
 @media (max-width: 720px) { .brand .brand-text { display: none; } }
+
+/* Opening a survey file */
+.survey-open { background: var(--bar); border: 1px solid var(--btn-hi); border-radius: 12px; padding: 14px 16px; margin: 14px auto; max-width: 520px; }
+.survey-open p { margin: 0 0 10px; }
+.survey-open .hint { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+.survey-open .hint:empty { display: none; }
+
+/* Start screen (no survey, no photos yet): just the way in */
+body.landing #speciesBar, body.landing footer.bar, body.landing #prevBtn, body.landing #nextBtn,
+body.landing #imageSelect, body.landing .empty .help { display: none !important; }
+body.landing .bar.top .row { justify-content: flex-start; }
+body.landing #menuBtn { margin-left: auto; }

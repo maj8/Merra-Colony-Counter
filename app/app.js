@@ -2,9 +2,10 @@
    Free to use with acknowledgement of Merra; see LICENSE.md.
  *
  * Two ways to use it:
- *  1. Survey mode: an administrator puts images in survey/images/ and a survey/survey.js file
- *     (made with admin.html) next to this app. Users just open the app and count.
- *  2. Own-images mode (no survey.js): users open their own photos.
+ *  1. Survey mode: the survey (settings and photos) made on the survey set-up page, either
+ *     opened as a survey file (survey-file.js keeps it on the device), or unzipped next to
+ *     this app (survey/survey.js and survey/images/). Counters just open it and count.
+ *  2. Own-images mode (no survey): users open their own photos.
  *
  * Dots are stored in each image's own pixel coordinates, keyed by file name, and saved in the
  * browser between sessions. Time spent on each image is recorded while the image is open, the
@@ -114,12 +115,19 @@ function addFiles(list) {
   }
   if (!added) { toast('No JPEG or PNG files found'); return; }
   names = [...files.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  document.body.classList.remove('landing');
   renderImageSelect();
   if (!curName || !files.has(curName)) openImage(names[0]);
   toast(`${added} image${added > 1 ? 's' : ''} loaded`);
+  $('surveyOpen').hidden = true;
+  if (!store.observer && !$('observerDlg').open) askObserver(false);
 }
 function loadSurvey() {
-  for (const it of SURVEY.images) files.set(it.file, 'survey/images/' + encodeURIComponent(it.file));
+  document.body.classList.remove('landing');
+  const onDevice = window.SURVEY_FILES || {};
+  for (const it of SURVEY.images) files.set(it.file, onDevice[it.file] || 'survey/images/' + encodeURIComponent(it.file));
+  $('surveyOpen').hidden = true;
+  if (window.SURVEY_FROM_DEVICE) $('removeSurveyBtn').hidden = false;
   names = SURVEY.images.map((i) => i.file);
   $('surveyRow').hidden = false;
   $('surveyTitle').textContent = SURVEY.title || 'Survey';
@@ -207,7 +215,9 @@ function openImage(name) {
     b.textContent = `Could not open ${name}`;
     const p = document.createElement('span');
     p.className = 'err';
-    p.textContent = typeof src === 'string'
+    p.textContent = window.SURVEY_FROM_DEVICE
+      ? ' \u2014 the photo kept on this device could not be read. Open the survey file again (Menu \u2192 Open a survey file).'
+      : typeof src === 'string'
       ? ` \u2014 the app looked for it at ${new URL(url, location.href).href.replace(/^file:\/\/\/?/, '')}. ` +
         'The survey photos must be in the survey/images folder next to index.html, with exactly the same file names.'
       : ' \u2014 the file could not be read as an image.';
@@ -563,6 +573,7 @@ $('menu').addEventListener('close', () => {
   $('menu').returnValue = '';
   lastTick = Date.now();
   if (v === 'observer') askObserver(false);
+  else if (v === 'removeSurvey') removeSurvey();
   else if (v === 'times') { tick(); deliver(`colony_times_${who()}_${stamp()}.csv`, toCSV(timesCSV()), 'text/csv'); }
   else if (v === 'points') {
     const rows = pointsCSV();
@@ -648,6 +659,34 @@ function toast(msg) {
   toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
 }
 
+// ---------- survey files ----------
+async function openSurveyFile(file) {
+  if (!file) return;
+  if (!window.MerraSurveyFile) { toast('Survey files cannot be opened here'); return; }
+  if (SURVEY && !confirm(`Open this survey instead of "${SURVEY.title || SURVEY.id}"?\n\nYour counts for "${SURVEY.title || SURVEY.id}" stay on this device and come back if you open its file again. Press Save first if you have not sent them yet.`)) return;
+  $('menu').open && $('menu').close();
+  closeSession();
+  $('empty').hidden = false; $('surveyOpen').hidden = false;
+  const said = (t) => { $('surveyOpenStatus').textContent = t; };
+  try {
+    const s = await window.MerraSurveyFile.open(file, { status: said });
+    said(`Opened "${s.title || s.id}". Starting…`);
+    setTimeout(() => location.reload(), 300);
+  } catch (err) {
+    said(err.message || String(err));
+    toast('Could not open that survey file');
+  }
+}
+for (const id of ['surveyFileInput', 'surveyFileInput2']) {
+  $(id).addEventListener('change', (e) => { const f = e.target.files[0]; e.target.value = ''; openSurveyFile(f); });
+}
+async function removeSurvey() {
+  if (!confirm(`Remove "${SURVEY.title || SURVEY.id}" and its photos from this device?\n\nYour counts stay on this device and come back if you open the survey file again. Press Save first if you have not sent them yet.`)) return;
+  closeSession();
+  try { await window.MerraSurveyFile.remove(); } catch (e) { /* already gone */ }
+  location.reload();
+}
+
 // ---------- start ----------
 if (window.CLAUDE_START && !SURVEY && !Object.keys(store.images).some((k) => store.images[k].points.length)) {
   store.species = CLAUDE_START.species; store.images = CLAUDE_START.images; save();
@@ -657,7 +696,8 @@ renderSpecies();
 resize();
 renderDone();
 if (SURVEY) loadSurvey();
-if (!store.observer && (SURVEY ? SURVEY.askObserver !== false : true)) askObserver(!!SURVEY);
+// In a survey the name is asked straight away; with your own photos, when the first ones are opened.
+if (!store.observer && SURVEY && SURVEY.askObserver !== false) askObserver(true);
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});

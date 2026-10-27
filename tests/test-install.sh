@@ -31,7 +31,7 @@ live() { readlink "$WWW/current"; }
 out="$(bash $INSTALL "$(bundle v9.0.0)" 2>&1)"; [ "$(live)" = releases/v9.0.0 ] && ok "first deploy goes live" || bad "first deploy goes live: $out"
 grep -q "colony.merra.org {" "$T/srv/gateway/conf/sites.d/colony.caddy" && grep -q "root \* /srv/www/colony/current" "$T/srv/gateway/conf/sites.d/colony.caddy" \
   && ok "first deploy writes the front-door settings" || bad "first deploy writes the front-door settings"
-[ -f "$WWW/current/download/merra-survey-builder.html" ] && [ ! -f "$WWW/current/SHA256SUMS" ] && ok "downloads served, fingerprint file removed" || bad "downloads served, fingerprint file removed"
+[ -f "$WWW/current/counter/survey-file.js" ] && [ ! -f "$WWW/current/SHA256SUMS" ] && ok "counter in place, fingerprint file removed" || bad "counter in place, fingerprint file removed"
 
 out="$(bash $INSTALL "$(bundle v9.0.0)" 2>&1)"; [ $? -ne 0 ] && grep -q "already live" <<<"$out" && ok "same version is refused" || bad "same version is refused"
 FORCE=1 bash $INSTALL "$(bundle v9.0.0)" >/dev/null 2>&1 && [ "$(live)" = releases/v9.0.0 ] && ok "same version with FORCE" || bad "same version with FORCE"

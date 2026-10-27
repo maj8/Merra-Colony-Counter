@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="icons/merra-apple-touch-180.png">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="landing">
 <header class="bar top">
   <div class="row" id="surveyRow" hidden>
     <span id="surveyTitle" class="survey-title"></span>
@@ -25,7 +25,7 @@
       <img src="icons/merra-favicon-64.png" alt="Merra">
       <span class="brand-text"><b>Colony Counter</b><small>by Merra</small></span>
     </a>
-    <label class="btn primary" id="openBtn" title="Choose image files">
+    <label class="btn" id="openBtn" title="Choose image files">
       Open images
       <input id="fileInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple hidden>
     </label>
@@ -44,14 +44,21 @@
 <main id="stage">
   <canvas id="canvas"></canvas>
   <div id="empty" class="empty">
-    <p id="emptyLead"><strong>Open your colony photos</strong> to start.</p>
-    <p>Pick a species, then <b>tap / click</b> each bird to add a dot.<br>
+    <div class="survey-open" id="surveyOpen">
+      <p><b>Been sent a survey file?</b> Open it here. It stays on this device, so you can count offline.</p>
+      <label class="btn primary">Open survey file
+        <input id="surveyFileInput" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
+      </label>
+      <p class="hint" id="surveyOpenStatus" aria-live="polite"></p>
+    </div>
+    <p id="emptyLead">Or count your own photos: press <strong>Open images</strong> at the top.</p>
+    <p class="help">Pick a species, then <b>tap / click</b> each bird to add a dot.<br>
        <b>Right-click</b> (or tap a dot of the selected species) to remove a dot.<br>
        Tapping a dot of another species changes it to the selected species.<br>
        Pinch or scroll to zoom, drag to pan. Press <b>Done</b> when an image is finished.</p>
     <p class="credit">Merra Colony Counter is free to use. Please acknowledge
        <b>Merra Colony Counter (merra.org)</b> when you use its counts.
-       <a href="about.html">About, downloads and survey builder</a> ·
+       <a href="about.html">About</a> · <a href="https://colony.merra.org/">Set up a survey</a> ·
        <a href="mailto:merra@merra.org?subject=Merra%20Colony%20Counter">merra@merra.org</a></p>
   </div>
   <div id="doneBanner" class="done-banner" hidden>Marked as done — press <b>Done</b> again to reopen and edit</div>
@@ -79,6 +86,10 @@
     <label class="btn wide">Restore from backup…
       <input id="restoreInput" type="file" accept="application/json,.json" hidden>
     </label>
+    <label class="btn wide" id="surveyFileMenuBtn">Open a survey file…
+      <input id="surveyFileInput2" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
+    </label>
+    <button class="btn wide" value="removeSurvey" id="removeSurveyBtn" hidden>Remove this survey from this device</button>
     <button class="btn wide" value="species" id="speciesMenuBtn">Edit species list</button>
     <button class="btn wide danger" value="clearImage">Clear dots on this image</button>
     <button class="btn wide danger" value="clearAll">Clear ALL data</button>
@@ -112,9 +123,9 @@
   </form>
 </dialog>
 
-<!-- Optional: a survey prepared by the administrator (see admin.html). If the file is
-     missing the app simply works in "open your own images" mode. -->
+<!-- A survey: survey/survey.js if one sits next to this page; otherwise survey-file.js loads
+     the survey file opened on this device, if any, and then starts app.js. -->
 <script src="survey/survey.js"></script>
-<script src="app.js"></script>
+<script src="survey-file.js"></script>
 </body>
 </html>

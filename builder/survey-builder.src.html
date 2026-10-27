@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Merra Colony Counter – set up a seabird count survey</title>
 <meta name="description" content="Free from Merra: set up a seabird colony photo count for a team. Add your photos and species list, get a counting app to send to your counters, then combine everyone's counts and times.">
-<link rel="icon" id="favicon">
+<link rel="icon" href="icons/merra-favicon-64.png">
+<link rel="apple-touch-icon" href="icons/merra-apple-touch-180.png">
 <meta name="theme-color" content="#131e21">
 <style>
   :root { --bg:#0d1517; --panel:#131e21; --fg:#e2ebe9; --muted:#92a6a8; --btn:#1c2b2f; --accent:#4fb3ba; --accent-ink:#062124; --ok:#74c487; --bad:#f2867e; --line:#26373b; }
@@ -49,15 +50,15 @@
 <body>
 <main>
   <div class="topnav">
-    <a class="brandbar" href="https://colony.merra.org/" style="text-decoration:none;margin:0"><img id="logo" alt="Merra"><span><b>Merra Colony Counter</b>Free from Merra</span></a>
-    <nav><a href="https://colony.merra.org/about.html">About</a><a href="https://colony.merra.org/counter/">Try the counter</a><a href="mailto:merra@merra.org?subject=Merra%20Colony%20Counter">Contact</a></nav>
+    <a class="brandbar" href="./" style="text-decoration:none;margin:0"><img id="logo" src="icons/merra-192.png" alt="Merra"><span><b>Merra Colony Counter</b>Free from Merra</span></a>
+    <nav><a href="about.html">About</a><a href="counter/">Try the counter</a><a href="mailto:merra@merra.org?subject=Merra%20Colony%20Counter">Contact</a></nav>
   </div>
   <h1>Set up a seabird count survey</h1>
-  <p class="sub">Give every counter the same photos and species list, and get back one set of counts, with the time each person spent on each photo. Free to use; your photos stay on this computer until you publish the survey yourself.</p>
+  <p class="sub">Give every counter the same photos and species list, and get back one set of counts, with the time each person spent on each photo. Free to use. Everything happens in your browser: your photos are never uploaded to Merra.</p>
   <ol class="how">
     <li><b>Set up</b>Title, species, instructions and photos, below.</li>
-    <li><b>Make the survey app</b>One zip with everything inside.</li>
-    <li><b>Send it out</b>Publish the zip and send counters the web address.</li>
+    <li><b>Make the survey file</b>One zip with everything inside.</li>
+    <li><b>Send it out</b>Counters open it at colony.merra.org/counter.</li>
     <li><b>Combine results</b>Counters send their Save file; merge them here.</li>
   </ol>
 
@@ -107,32 +108,29 @@ Unidentified</textarea>
   </section>
 
   <section>
-    <h2>3 · Make the survey app</h2>
-    <p class="hint">This builds the complete counting app with your photos and settings already inside — nothing to copy or move by hand.</p>
+    <h2>3 · Make the survey file</h2>
+    <p class="hint">One file with your photos and settings inside. It is made here on your computer; nothing is uploaded.</p>
     <div class="row">
-      <button class="btn primary" id="buildZip" disabled>Download survey app (.zip)</button>
-      <button class="btn" id="buildDir" disabled>Save into a folder on this computer…</button>
+      <button class="btn primary" id="buildZip" disabled>Download survey file (.zip)</button>
     </div>
     <p id="buildMsg" class="hint" aria-live="polite"></p>
     <div id="publish" class="hint" hidden>
-      <b style="color:var(--fg)">Send it to your counters — publish it as a web app:</b>
+      <b style="color:var(--fg)">Send it to your counters:</b>
       <ol class="steps">
-        <li>Go to <a href="https://app.netlify.com/drop" target="_blank" rel="noopener" style="color:var(--accent)">app.netlify.com/drop</a>
-            (free; sign up so the site stays up and isn't password-protected).</li>
-        <li>Drag the <b>zip file</b> (or the saved folder) onto the page. You get a web address such as
-            <code>https://something.netlify.app</code> — you can rename it in Site settings.</li>
-        <li>Email or message that address to the counters. They open it, enter their name and start counting.
-            On a phone or tablet they can choose <i>Add to Home Screen</i> / <i>Install app</i>; after the first visit the
-            photos are stored on the device and it works without signal.</li>
-        <li>When they finish they press <b>Save</b> and send you the file; combine them in step 4.</li>
+        <li><span id="sendHow">Send them the survey file. Survey files are often too big to email, so use a file-sharing service
+            (for example WeTransfer, Google Drive, OneDrive or Dropbox), or a USB stick.</span></li>
+        <li>They click the link <a href="https://colony.merra.org/counter/" target="_blank" rel="noopener">colony.merra.org/counter</a> on a phone,
+            tablet or computer, press <b>Open survey file</b> and choose the file. The survey stays on their device, so they can count
+            without a signal. They do not need to unzip it. On a phone or tablet they can add the counter to the home screen.</li>
+        <li>When they finish they press <b>Save</b> and send you the save file. Combine them in step 4.</li>
       </ol>
-      <p>To change the survey later, build again and drag the new zip onto your site's <i>Deploys</i> page — everyone gets the update
-         next time they open it. Keep the same Survey ID to keep counters' progress; use a new one for a new survey.</p>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="copyMsg">Copy a message for your counters</button>
+        <span id="copyDone" class="hint"></span>
+      </div>
+      <p>To change the survey, make a new file with the <b>same Survey ID</b> and send it again: counters open it and carry on
+         where they left off. Use a new Survey ID for a new survey.</p>
     </div>
-    <details style="margin-top:8px"><summary class="hint">Advanced</summary>
-      <p class="hint">Download only the settings file (<code>survey.js</code>) for a copy of the app you manage yourself.</p>
-      <button class="btn" id="build" disabled>Download survey.js only</button>
-    </details>
   </section>
 
   <section>
@@ -195,7 +193,7 @@ function renderImages() {
   });
   $('imgTable').hidden = !list.length;
   $('imgCount').textContent = list.length ? `${list.length} photo${list.length > 1 ? 's' : ''}` : 'No photos yet';
-  $('build').disabled = $('buildZip').disabled = $('buildDir').disabled = !list.length;
+  $('buildZip').disabled = !list.length;
 }
 $('pick').onchange = (e) => addImages(e.target.files);
 $('pickDir').onchange = (e) => addImages(e.target.files);
@@ -243,8 +241,8 @@ function surveyJS() {
     allowOwnImages: $('ownImg').checked, idleSeconds: Math.max(15, +$('idle').value || 60),
     created: new Date().toISOString(), images: list,
   };
-  const text = '// Colony Counter survey file - made with admin.html. It lives in survey/ next to the app,\n' +
-               '// with the photos in survey/images/.\nself.SURVEY = ' + JSON.stringify(survey, null, 1) + ';\n';
+  const text = '// Merra Colony Counter survey, made on colony.merra.org.\n' +
+               'self.SURVEY = ' + JSON.stringify(survey, null, 1) + ';\n';
   return { id, text };
 }
 function saveBlob(name, blob) {
@@ -253,30 +251,15 @@ function saveBlob(name, blob) {
   a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 }
-$('build').onclick = () => saveBlob('survey.js', new Blob([surveyJS().text], { type: 'text/javascript' }));
 
-// ---------- the complete app, embedded so this page works from disk too ----------
-const APP_FILES = /*APP_FILES*/{};
-const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
-if (APP_FILES['icons/merra-192.png']) $('logo').src = 'data:image/png;base64,' + APP_FILES['icons/merra-192.png'];
-if (APP_FILES['icons/merra-favicon-64.png']) $('favicon').href = 'data:image/png;base64,' + APP_FILES['icons/merra-favicon-64.png'];
+// ---------- the survey file: settings and photos, nothing else ----------
 const enc = new TextEncoder();
-// Every file of the finished app (paths relative to the app folder), as Uint8Array / Blob.
-function appEntries(id) {
-  const out = [];
-  for (const [path, data] of Object.entries(APP_FILES)) {
-    let bytes = b64(data);
-    if (path === 'sw.js') {   // new cache name per build, so devices pick up changed photos
-      const stamp = new Date().toISOString().replace(/\D/g, '').slice(0, 14);
-      bytes = enc.encode(new TextDecoder().decode(bytes)
-        .replace(/const VERSION = '([^']*)';/, (m, v) => `const VERSION = '${v}-${id}-${stamp}';`));
-    }
-    out.push({ path, data: bytes });
-  }
-  return out;
-}
+const README = (title) => `Merra Colony Counter survey: ${title}\r\n\r\n` +
+  `To count: open https://colony.merra.org/counter/ on your phone, tablet or computer,\r\n` +
+  `press "Open survey file" and choose this zip file (you do not need to unzip it).\r\n\r\n` +
+  `Free from Merra (https://merra.org). Questions: merra@merra.org\r\n`;
 const busy = (on, msg) => {
-  $('buildZip').disabled = $('buildDir').disabled = on || !images.size;
+  $('buildZip').disabled = on || !images.size;
   $('buildMsg').textContent = msg || '';
 };
 
@@ -313,57 +296,36 @@ $('buildZip').onclick = async () => {
   try {
     const { id, text } = surveyJS();
     busy(true, 'Packing photos…');
-    const entries = appEntries(id);
-    entries.push({ path: 'survey/survey.js', data: enc.encode(text) });
+    const entries = [
+      { path: 'README.txt', data: enc.encode(README($('title').value.trim() || id)) },
+      { path: 'survey/survey.js', data: enc.encode(text) },
+    ];
     let i = 0;
     for (const it of sortedImages()) {
       busy(true, `Packing photo ${++i} of ${images.size}…`);
       entries.push({ path: 'survey/images/' + it.file, data: new Uint8Array(await it.blob.arrayBuffer()) });
     }
     const zip = zipBlob(entries);
-    saveBlob(`merra-colony-counter_${id}.zip`, zip);
-    busy(false, `Downloaded merra-colony-counter_${id}.zip (${(zip.size / 1048576).toFixed(0)} MB, ${images.size} photos).` +
-      (zip.size > 50 * 1048576 ? ' It is over 50 MB, so the upload may take a few minutes.' : ''));
+    saveBlob(`colony-survey_${id}.zip`, zip);
+    lastZip = { name: `colony-survey_${id}.zip`, size: zip.size, title: $('title').value.trim() || id };
+    busy(false, `Downloaded colony-survey_${id}.zip (${Math.max(1, Math.round(zip.size / 1048576))} MB, ${images.size} photos) to your Downloads folder.`);
+    if (zip.size < 18 * 1048576) $('sendHow').textContent = 'Send them the survey file. It is small enough to attach to an email; you can also use a file-sharing service or a USB stick.';
     $('publish').hidden = false;
   } catch (err) { busy(false, 'Could not build the zip: ' + err.message); }
 };
 
-// --- write straight into a folder (Chrome / Edge) ---
-if (!window.showDirectoryPicker) {
-  $('buildDir').title = 'Needs Chrome or Edge on a computer — use the zip instead';
-  $('buildDir').style.display = 'none';
-}
-async function writeFile(dir, path, data) {
-  const parts = path.split('/'); const name = parts.pop();
-  for (const p of parts) dir = await dir.getDirectoryHandle(p, { create: true });
-  const fh = await dir.getFileHandle(name, { create: true });
-  const w = await fh.createWritable(); await w.write(data); await w.close();
-}
-$('buildDir').onclick = async () => {
-  let root;
-  try { root = await window.showDirectoryPicker({ id: 'colony-survey', mode: 'readwrite' }); }
-  catch (err) { return; }   // cancelled
-  try {
-    const { id, text } = surveyJS();
-    busy(true, 'Writing the app…');
-    for (const e of appEntries(id)) await writeFile(root, e.path, e.data);
-    await writeFile(root, 'survey/survey.js', text);
-    const imgDir = await (await root.getDirectoryHandle('survey', { create: true })).getDirectoryHandle('images', { create: true });
-    let i = 0;
-    for (const it of sortedImages()) {
-      busy(true, `Copying photo ${++i} of ${images.size}…`);
-      await writeFile(imgDir, it.file, it.blob);
-    }
-    // tidy: photos left over from an earlier survey are removed from survey/images
-    const keep = new Set(images.keys()); let removed = 0;
-    for await (const [name, h] of imgDir.entries()) {
-      if (h.kind === 'file' && !keep.has(name)) { try { await imgDir.removeEntry(name); removed++; } catch (e) { /* ignore */ } }
-    }
-    busy(false, `Saved the app and ${images.size} photos into the folder "${root.name}"` +
-      (removed ? ` (removed ${removed} old file${removed > 1 ? 's' : ''} from survey/images)` : '') +
-      '. Double-click index.html in that folder to try it, then drag the folder onto Netlify Drop to publish it.');
-    $('publish').hidden = false;
-  } catch (err) { busy(false, 'Could not write to that folder: ' + err.message); }
+// --- a message to paste into an email or chat to the counters ---
+let lastZip = null;
+$('copyMsg').onclick = async () => {
+  const z = lastZip || { name: 'the survey file', title: $('title').value.trim() || 'the survey' };
+  const text = `Hello,\n\nPlease count the birds in the photos for "${z.title}". The survey file is attached (or linked): ${z.name}\n\n` +
+    `1. Save the file to your phone, tablet or computer (no need to unzip it).\n` +
+    `2. Click this link: https://colony.merra.org/counter/ then press "Open survey file" and choose the file.\n` +
+    `3. Pick a species and tap each bird. Press Done when a photo is finished.\n` +
+    `4. When you have finished (or stop for the day), press Save and send me the file it makes.\n\n` +
+    `It works without a signal once the survey is open. Thank you!`;
+  try { await navigator.clipboard.writeText(text); $('copyDone').textContent = 'Copied. Paste it into your email or message.'; }
+  catch (e) { prompt('Copy this message:', text); }
 };
 
 // ---------- combine results ----------

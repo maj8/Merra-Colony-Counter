@@ -3,8 +3,10 @@
 The source of **https://colony.merra.org**: a free tool for counting seabirds in colony photos,
 species by species. Counters tap each bird; the app keeps a dot on every bird and produces a master
 counts CSV, every dot's position, and how long each person spent on each photo. The front page, the survey set-up,
-packs a fixed set of photos, a species list and instructions into a ready-to-publish survey app for
-a team, and combines everyone's results.
+packs a fixed set of photos, a species list and instructions into one survey file that the organiser
+sends to the counters; they open it at colony.merra.org/counter and it stays on their device. The set-up
+page also combines everyone's results. Photos and counts are never uploaded to the Merra server: the
+server only serves the app.
 
 Questions: merra@merra.org. Free to use, as long as Merra is acknowledged (see [`LICENSE.md`](LICENSE.md)):
 
@@ -16,15 +18,10 @@ This repository is the master copy. What is in `main` is what colony.merra.org s
 
 | Folder | What it is | Served at |
 |---|---|---|
-| `builder/` | the survey set-up page (the front page). The build embeds the whole counter in it, so the one file can make survey apps even when opened from disk | colony.merra.org/ |
-| `app/` | the counter (installable web app, works offline) and the About / downloads page; every survey app is this plus the survey | colony.merra.org/counter/, /about.html |
-| `docs/USER-GUIDE.md` | instructions for organisers and counters (the README inside the downloadable zip) | in the zip |
+| `builder/` | the survey set-up page (the front page) | colony.merra.org/ |
+| `app/` | the counter (installable web app, works offline): opens survey files (`survey-file.js`, kept in the browser's IndexedDB) or your own photos; and the About page | colony.merra.org/counter/, /about.html |
+| `docs/USER-GUIDE.md` | instructions for organisers and counters | – |
 | `scripts/`, `deploy/`, `tests/` | checks, build, server install, tests | – |
-
-Downloads made by every build, linked from colony.merra.org/about.html:
-
-- `download/merra-survey-builder.html`: the survey set-up page as one file
-- `download/merra-colony-counter.zip`: survey set-up page, counter, user guide and licence
 
 ## Making a change
 
@@ -46,8 +43,8 @@ read the **first** red step; the ones after it failed because it did.
 | Step | What happens | If it fails |
 |---|---|---|
 | Check | `scripts/check.sh`: version readable, offline files exist, JavaScript parses, Merra credit present, nothing built committed | Nothing is built or sent |
-| Build | `scripts/build.sh`: the site, the survey builder with the app embedded, the downloads, `version.json`, a fingerprint of every file | Nothing is sent |
-| Test | `tests/test-install.sh` (server install script, in a throwaway folder) and `tests/e2e.py` (counter, about page, survey builder and a survey app it makes, in Chromium) | Nothing is sent |
+| Build | `scripts/build.sh`: the site (set-up page, counter, About), `version.json`, a fingerprint of every file | Nothing is sent |
+| Test | `tests/test-install.sh` (server install script, in a throwaway folder) and `tests/e2e.py` (in Chromium: set-up page makes a survey file, a counter opens it on a phone-sized screen and it survives a reload, Windows/Mac re-zipped files, own photos, About page) | Nothing is sent |
 | Send | Copies the bundle to the server and runs `deploy/install-release.sh`, which checks every file arrived byte for byte | Nothing is switched |
 | Switch | Puts the version in `/srv/merra/www/colony/releases/<version>/` and points `current` at it in one step. Writes colony.merra.org's front-door settings (`sites.d/colony.caddy`) on the first deploy, or when they change | Refused settings are put back |
 | Confirm | Asks colony.merra.org for its version, from the server and from outside, and compares files with the build | The previous version is put back automatically |
